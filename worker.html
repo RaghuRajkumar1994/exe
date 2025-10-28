@@ -2,98 +2,362 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Production Submission</title>
+    <title>Production Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: sans-serif; padding: 20px; max-width: 600px; margin: auto; background-color: #f4f4f9; }
-        h1 { color: #333; text-align: center; border-bottom: 2px solid #ccc; padding-bottom: 10px;}
-        label { display: block; margin-top: 10px; font-weight: bold; color: #555; }
-        input, select { width: 100%; padding: 10px; margin-bottom: 15px; box-sizing: border-box; border-radius: 6px; border: 1px solid #ccc; font-size: 16px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            padding: 20px; 
+            background-color: #f4f7f9; 
+            color: #333;
+            min-height: 100vh;
+        }
+        .main-container {
+            /* 1. FLEXIBLE WIDTH FIX: Allows the content to expand on large screens */
+            max-width: 1600px; 
+            margin: auto; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 { color: #1F2937; text-align: center; border-bottom: 2px solid #D1D5DB; padding-bottom: 10px; margin-bottom: 20px; width: 100%; }
+        .card { 
+            background-color: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+        label { display: block; margin-top: 10px; font-weight: 600; color: #4B5563; }
+        
+        /* === Input & Select Size/Style + Animation === */
+        input:not(#produced-qty):not(#produced-length):not(#qty-produced-hours), select { 
+            width: 100%; 
+            padding: 9px; 
+            margin-bottom: 10px; /* Kept for most fields */
+            box-sizing: border-box; 
+            border-radius: 6px; 
+            border: 1px solid #D1D5DB; 
+            font-size: 15px; 
+            transition: all 0.2s ease-in-out, box-shadow 0.2s ease-in-out; 
+        }
+        
+        input:focus, select:focus { 
+            border-color: #3B82F6; 
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); 
+        }
+        
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-group button { flex: 1; padding: 12px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; }
-        #submit-button { background-color: #4CAF50; color: white; }
-        #submit-button:hover { background-color: #45a049; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);}
-        #reset-button { background-color: #f44336; color: white; }
-        #reset-button:hover { background-color: #d32f2f; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);}
+        .btn-group button { 
+            flex: 1; 
+            padding: 12px; 
+            font-weight: bold; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: background-color 0.2s, box-shadow 0.2s;
+            text-transform: uppercase;
+        }
+        #submit-button { background-color: #10B981; color: white; }
+        #submit-button:hover { background-color: #059669; box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);}
+        #reset-button { background-color: #EF4444; color: white; }
+        #reset-button:hover { background-color: #DC2626; box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);}
+        .message { text-align: center; font-weight: bold; margin-top: 20px; padding: 10px; border-radius: 4px; }
         .input-row { display: flex; gap: 10px; margin-bottom: 10px; }
-        .input-row.three-col > div { flex: 1; } 
-        .message { text-align: center; color: green; font-weight: bold; margin-top: 20px; background-color: #e6ffe6; padding: 10px; border-radius: 4px; }
+        .input-row > div { flex: 1; } 
+        
+        /* === Qty/Length/Hours Specific Style === */
+        .input-row-qty > div > input {
+            min-width: 100px; 
+            font-size: 1.1rem; 
+            padding: 12px 10px; 
+            text-align: center; 
+            font-weight: 700; 
+            background-color: #EFFBEB; 
+            border-color: #34D399; 
+            transition: all 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .input-row-qty > div > input:focus {
+            border-color: #10B981; 
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3); 
+        }
+        .input-row-qty > div {
+            flex-grow: 1; 
+            min-width: 0; 
+        }
+        .input-row-qty label {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #065F46; 
+            font-weight: 700;
+        }
+        
+        /* === Plan Sheet Styles - Full Flexibility (Height & Width) === */
+        #plan-sheet-container { 
+            border: 2px solid #3B82F6; 
+            border-radius: 8px; 
+            padding: 15px;
+            background-color: #EFF6FF;
+            transition: all 0.3s ease;
+            
+            min-height: 50vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+            position: sticky; 
+            top: 20px;
+            flex-grow: 1; /* Crucial for occupying vertical space */
+        }
+        .plan-title {
+            color: #1E40AF;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            flex-shrink: 0; 
+        }
+        #plan-data-view {
+            flex-grow: 1; 
+            overflow-y: auto; 
+            overflow-x: auto; /* Allows horizontal scrolling if table exceeds container width */
+            margin-top: 10px;
+        }
+        #plan-sheet-table { 
+            width: 100%; /* Ensures table uses the full width of the container */
+            border-collapse: collapse; 
+        }
+        #plan-sheet-table th, #plan-sheet-table td {
+            border: 1px solid #BFDBFE;
+            padding: 8px;
+            text-align: left;
+            font-size: 0.8rem; 
+        }
+        #plan-sheet-table th {
+            background-color: #60A5FA;
+            color: white;
+            position: sticky; 
+            top: 0;
+            z-index: 10;
+        }
+        
+        .plan-completed {
+            background-color: #D1FAE5 !important; 
+            opacity: 0.8;
+        }
+        .plan-completed td {
+            text-decoration: line-through;
+            color: #6B7280;
+        }
+        .complete-button {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            transition: background-color 0.15s;
+        }
+        .complete-button-pending {
+            background-color: #10B981;
+            color: white;
+        }
+        .complete-button-pending:hover {
+            background-color: #059669;
+        }
+        .complete-button-completed {
+            background-color: #34D399;
+            color: white;
+            cursor: default;
+        }
+
+        /* Main Layout Grid */
+        .main-content-grid {
+            display: grid;
+            grid-template-columns: 1fr; 
+            gap: 30px; 
+            width: 100%;
+            align-items: stretch; 
+        }
+        @media (min-width: 1024px) {
+            .main-content-grid {
+                grid-template-columns: 1.3fr 1.7fr; 
+            }
+        }
+        .data-entry-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; 
+        }
+        /* Button in the connection row needs more vertical height/padding to match the select box's total height */
+        #join-room-button {
+             /* Adjust padding to fill the space created by the label above */
+             padding-top: 10px;
+             padding-bottom: 10px;
+        }
+        
+        /* === NEW TOAST/MESSAGING STYLES (Bottom Right) === */
+        .toast-box {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 300px; /* Small Rectangle */
+            min-height: 80px;
+            background-color: #3B82F6; /* Blue for attention */
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            z-index: 50;
+            
+            /* Initial state (off-screen) */
+            transform: translateX(120%);
+            opacity: 0;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+        
+        .toast-box.active {
+            /* Active state (on-screen) */
+            transform: translateX(0);
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
-    <h1>Production Data Entry</h1>
+    <div class="main-container">
+        <h1>Production Data</h1>
+        
+        <div class="main-content-grid">
+            
+            <div class="data-entry-container">
+                
+                <div class="card bg-indigo-50 border border-indigo-200">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Connection Status</h2>
+                    <div class="input-row items-end">
+                        <div style="flex-grow: 2;">
+                            <label for="machine-name-input">My Machine Name (Crucial):</label>
+                            <select id="machine-name-input" required class="uppercase">
+                                <option value="" disabled selected>Select Machine</option>
+                                <option value="AUM-002">AUM-002</option>
+                                <option value="AUM-003">AUM-003</option>
+                                <option value="AUM-009">AUM-009</option>
+                                <option value="AUM-001">AUM-001</option>
+                                <option value="AUM-010">AUM-010</option>
+                                <option value="AUM-005">AUM-005</option>
+                                <option value="AUM-011">AUM-011</option>
+                                <option value="AUM-012">AUM-012</option>
+                            </select>
+                        </div>
+                        <div style="flex-grow: 1;"> 
+                            <button onclick="joinMachineRoom()" id="join-room-button" class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition duration-150 shadow-md">
+                                Connect & Load Plan
+                            </button>
+                        </div>
+                    </div>
+                    <p id="room-status" class="text-sm mt-2 font-medium text-indigo-700">Not connected to a machine room.</p>
+                </div>
 
-    <div class="input-row">
-        <div>
-            <label for="entry-date">Production Date (System Time):</label>
-            <input type="date" id="entry-date" required>
+                <div class="card submission-card">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Submit Production Output</h2>
+
+                    <div class="input-row">
+                        <div>
+                            <label for="entry-date">Production Date:</label>
+                            <input type="date" id="entry-date" required>
+                        </div>
+                        <div>
+                            <label for="entry-time">Production Time:</label>
+                            <input type="time" id="entry-time" required>
+                        </div>
+                    </div>
+                    
+                    <label for="shift">Shift:</label>
+                    <select id="shift" required>
+                        <option value="" disabled selected>Select Shift</option>
+                        <option value="A">Shift A</option>
+                        <option value="B">Shift B</option>
+                        <option value="C">Shift C</option>
+                    </select>
+
+                    <label for="worker-name">Worker Name:</label>
+                    <input type="text" id="worker-name" placeholder="Enter your name" required>
+
+                    <input type="hidden" id="machine-name" value="" required> 
+
+                    <div class="input-row">
+                        <div>
+                            <label for="fg-part-no">FG Part No:</label>
+                            <input type="text" id="fg-part-no" placeholder="e.g., P-789" required>
+                        </div>
+                    </div>
+                    
+                    <label for="cable-id">Cable Identification:</label>
+                    <input type="text" id="cable-id" placeholder="e.g., 1.5mm Blue" required>
+
+                    <div class="input-row input-row-qty">
+                        <div>
+                            <label for="produced-qty">Produced Qty:</label>
+                            <input type="number" id="produced-qty" placeholder="Units Produced" required min="1">
+                        </div>
+                        <div>
+                            <label for="produced-length">Length (M/F):</label>
+                            <input type="number" step="0.1" id="produced-length" placeholder="e.g., 50.5" required min="0.1">
+                        </div>
+                        <div>
+                            <label for="qty-produced-hours">HOURS:</label>
+                            <input type="number" step="0.1" id="qty-produced-hours" placeholder="e.g., 4.5" required min="0.1">
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button id="submit-button" onclick="submitOutput()">Submit Production Data</button>
+                        <button id="reset-button" onclick="resetForm()">Reset All Fields</button>
+                    </div>
+
+                    <div id="message" class="message"></div>
+                </div>
+                </div>
+            <div id="plan-sheet-container" class="card">
+                <div class="plan-title">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                    <span class="text-xl">Active Plan Sheet:</span> <span id="current-plan-machine" class="text-lg font-normal">N/A</span>
+                </div>
+                
+                <div id="plan-data-view">
+                    <p class="text-gray-500 italic">Plan data will appear here after the dashboard assigns a sheet.</p>
+                </div>
+            </div>
+            </div> 
+        </div> 
+
+        <div id="toast-container" class="toast-box">
+            <div class="flex justify-between items-center mb-1">
+                <h2 class="text-sm font-semibold text-white flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    Live Message
+                </h2>
+                <button onclick="hideMessageBox()" class="text-white hover:text-gray-200 focus:outline-none -mt-1 -mr-1 p-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <p id="live-message-content" class="text-sm text-white font-medium"></p>
         </div>
-        <div>
-            <label for="entry-time">Production Time (System Time):</label>
-            <input type="time" id="entry-time" required>
-        </div>
-    </div>
-    
-    <label for="shift">Shift:</label>
-    <select id="shift" required>
-        <option value="" disabled selected>Select Shift</option>
-        <option value="A">Shift A</option>
-        <option value="B">Shift B</option>
-        <option value="C">Shift C</option>
-    </select>
 
-    <label for="worker-name">Worker Name:</label>
-    <input type="text" id="worker-name" placeholder="Enter your name" required>
 
-    <label for="machine-name">Machine Name:</label>
-    <input type="text" id="machine-name" placeholder="e.g., W_CUT_01" required>
-
-    <div class="input-row">
-        <div>
-            <label for="order-no">Order No:</label>
-            <input type="text" id="order-no" placeholder="e.g., C00123" required>
-        </div>
-        <div>
-            <label for="fg-part-no">FG Part No:</label>
-            <input type="text" id="fg-part-no" placeholder="e.g., P-789" required>
-        </div>
-    </div>
-    
-    <label for="cable-id">Cable Identification:</label>
-    <input type="text" id="cable-id" placeholder="e.g., 1.5mm Blue" required>
-
-    <label for="applicator-no">Applicator No:</label>
-    <input type="text" id="applicator-no" placeholder="e.g., APL-05" required>
-
-    <div class="input-row three-col">
-        <div>
-            <label for="produced-qty">Produced Qty:</label>
-            <input type="number" id="produced-qty" placeholder="Units Produced" required min="1">
-        </div>
-        <div>
-            <label for="produced-length">Length (M/F):</label>
-            <input type="number" step="0.1" id="produced-length" placeholder="e.g., 50.5" required min="0.1">
-        </div>
-        <div>
-            <label for="worked-hours">Worked Hours (Dec):</label>
-            <input type="number" step="0.1" id="worked-hours" placeholder="e.g., 4.5" required min="0.1">
-        </div>
-    </div>
-    
-    <div class="btn-group">
-        <button id="submit-button" onclick="submitOutput()">Submit Production Data</button>
-        <button id="reset-button" onclick="resetForm()">Reset All Fields</button>
-    </div>
-
-    <div id="message" class="message"></div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script>
         const socket = io();
+        const machineNameInput = document.getElementById('machine-name-input');
+        const machineNameHidden = document.getElementById('machine-name');
+        const roomStatus = document.getElementById('room-status');
+        const planDataView = document.getElementById('plan-data-view');
+        const currentPlanMachine = document.getElementById('current-plan-machine');
+        
+        // --- UPDATED VARIABLES FOR TOAST ---
+        const messageBox = document.getElementById('toast-container'); // Points to the new toast box
+        const messageContent = document.getElementById('live-message-content');
 
-        // Utility to set current date/time
         function setInitialDateTime() {
             const now = new Date();
-            const year = now.getFullYear();
+            const year = String(now.getFullYear());
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
             const hours = String(now.getHours()).padStart(2, '0');
@@ -105,28 +369,177 @@
         
         document.addEventListener('DOMContentLoaded', setInitialDateTime);
 
-        // Function to reset ALL fields
+        function joinMachineRoom() {
+            const machineName = machineNameInput.value.trim().toUpperCase();
+            
+            if (machineName) {
+                machineNameHidden.value = machineName; 
+                
+                socket.emit('join_machine_room', { machineName: machineName });
+                roomStatus.textContent = `Attempting to connect to room: ${machineName}...`;
+                roomStatus.className = 'text-sm mt-2 font-medium text-amber-600';
+            } else {
+                roomStatus.textContent = 'Please select a Machine Name from the list.';
+                roomStatus.className = 'text-sm mt-2 font-medium text-red-600';
+            }
+        }
+        
+        // --- SocketIO Listener for Plan Update ---
+        socket.on('update_worker_plan', (data) => {
+            const plan = data.plan;
+            const machineName = data.machineName;
+            const message = data.message;
+
+            roomStatus.textContent = `Connected to room: ${machineName}.`;
+            roomStatus.className = 'text-sm mt-2 font-medium text-green-600';
+            currentPlanMachine.textContent = machineName;
+            
+            if (plan && plan.length > 0) {
+                renderPlanTable(plan);
+            } else {
+                planDataView.innerHTML = `<p class="text-gray-500 italic">${message || 'No active plan found for this machine.'}</p>`;
+            }
+        });
+
+        // --- Message Box Functionality ---
+        function hideMessageBox() {
+            // Updated to remove the 'active' class to trigger the slide-out animation
+            messageBox.classList.remove('active'); 
+        }
+
+        // --- SocketIO Listener for Live Messages ---
+        let messageTimer;
+        socket.on('receive_message', (data) => {
+            
+            clearTimeout(messageTimer); 
+            
+            messageContent.innerHTML = `<strong>${data.sender || 'System'}:</strong> ${data.message || 'No message content.'}`;
+            
+            // Add 'active' class to trigger the slide-in animation
+            messageBox.classList.add('active'); 
+            
+            messageTimer = setTimeout(() => {
+                hideMessageBox(); // This calls the updated function, triggering slide-out
+            }, 10000); // Message auto-hides after 10 seconds
+        });
+
+        /**
+         * Renders the Active Plan Sheet table.
+         */
+        function renderPlanTable(plan) {
+            if (plan.length === 0) {
+                planDataView.innerHTML = '<p class="text-gray-500 italic">No plan data to display.</p>';
+                return;
+            }
+
+            // Generate keys from the first row, filtering out control fields
+            const dataKeys = Object.keys(plan[0]).filter(key => key !== 'status' && key !== 'line_id');
+            
+            let html = '<table id="plan-sheet-table"><thead><tr>';
+            
+            // Add data headers
+            dataKeys.forEach(key => {
+                // Convert camelCase keys to human-readable strings (e.g., 'fgPartNo' -> 'Fg Part No')
+                const displayKey = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1').trim();
+                html += `<th>${displayKey}</th>`;
+            });
+            
+            html += '<th>Complete</th>';
+            html += '</tr></thead><tbody>';
+
+            plan.forEach((row, index) => {
+                const status = row.status || 'pending'; 
+                // Use line_id if available, otherwise a temporary index (Backend SHOULD provide line_id)
+                const lineId = row.line_id || `temp-line-${index}`; 
+                const rowClass = status === 'completed' ? 'plan-completed' : '';
+
+                // *** FIX 1: Added ID to the row for instant lookup in markPlanItemComplete ***
+                html += `<tr id="plan-line-${lineId}" class="${rowClass}">`;
+                
+                // Add data cells
+                dataKeys.forEach(key => {
+                    html += `<td>${row[key] || ''}</td>`;
+                });
+                
+                // Add the 'Complete' action cell
+                html += '<td>';
+                
+                if (status === 'completed') {
+                     html += `<button class="complete-button complete-button-completed" disabled>✅ Done</button>`;
+                } else {
+                     html += `<button class="complete-button complete-button-pending" onclick="markPlanItemComplete('${lineId}')">Mark Complete</button>`;
+                }
+                
+                html += '</td>';
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            planDataView.innerHTML = html;
+        }
+
+        /**
+         * Sends a request to the server to mark a plan item as completed.
+         */
+        function markPlanItemComplete(lineId) {
+            const machineName = machineNameHidden.value.trim();
+            if (!machineName) {
+                alert("Error: Please connect to a machine room first.");
+                return;
+            }
+            
+            const confirmAction = confirm(`Are you sure you want to mark plan item ${lineId} as COMPLETE?`);
+            
+            if (confirmAction) {
+                
+                // 1. Optimistically update the UI (instant visual feedback)
+                const row = document.getElementById(`plan-line-${lineId}`);
+                const button = row ? row.querySelector('.complete-button') : null;
+
+                if (row && button) {
+                    row.classList.add('plan-completed');
+                    button.classList.remove('complete-button-pending');
+                    button.classList.add('complete-button-completed');
+                    button.textContent = '✅ Done';
+                    button.disabled = true;
+                }
+                
+                // 2. Send the request to the server
+                socket.emit('complete_plan_item', { 
+                    machineName: machineName, 
+                    lineId: lineId 
+                });
+                
+                // The server will send a full plan update shortly after to confirm and refresh the data
+            }
+        }
+
         function resetForm() {
             document.getElementById('worker-name').value = '';
-            document.getElementById('machine-name').value = '';
-            document.getElementById('order-no').value = '';
             document.getElementById('fg-part-no').value = '';
-            document.getElementById('applicator-no').value = '';
             document.getElementById('cable-id').value = '';
             document.getElementById('produced-qty').value = '';
             document.getElementById('produced-length').value = '';
-            document.getElementById('worked-hours').value = ''; 
+            document.getElementById('qty-produced-hours').value = ''; 
             document.getElementById('shift').value = '';
             
             setInitialDateTime();
 
             document.getElementById('message').textContent = 'All fields have been reset.';
-            document.getElementById('message').style.backgroundColor = '#ffccee';
+            document.getElementById('message').style.backgroundColor = '#FEF2F2';
+            document.getElementById('message').style.color = '#EF4444';
             setTimeout(() => { document.getElementById('message').textContent = ''; }, 3000); 
         }
         
         function submitOutput() {
-            // Re-capture system time right before submission for accuracy
+            const machineName = machineNameHidden.value.trim();
+            if (!machineName) {
+                document.getElementById('message').textContent = 'Error: Please select your Machine Name and click "Connect & Load Plan" first.';
+                document.getElementById('message').style.backgroundColor = '#FEE2E2';
+                document.getElementById('message').style.color = '#B91C1C';
+                return;
+            }
+
             setInitialDateTime();
 
             const data = {
@@ -134,42 +547,66 @@
                 entryTime: document.getElementById('entry-time').value.trim(),
                 shift: document.getElementById('shift').value.trim(),
                 workerName: document.getElementById('worker-name').value.trim(),
-                machineName: document.getElementById('machine-name').value.trim(),
-                orderNo: document.getElementById('order-no').value.trim(),
+                machineName: machineName,
+                orderNo: 'N/A', 
                 fgPartNo: document.getElementById('fg-part-no').value.trim(),
-                applicatorNo: document.getElementById('applicator-no').value.trim(),
+                applicatorNo: 'N/A', 
                 cableId: document.getElementById('cable-id').value.trim(),
                 producedQty: document.getElementById('produced-qty').value.trim(),
                 producedLength: document.getElementById('produced-length').value.trim(),
-                workedHours: document.getElementById('worked-hours').value.trim()
+                qtyProducedHours: document.getElementById('qty-produced-hours').value.trim()
             };
 
-            // Basic validation check
-            for (const key in data) {
-                if (!data[key]) {
-                    document.getElementById('message').textContent = 'Please fill out all required fields.';
-                    document.getElementById('message').style.backgroundColor = '#ffcccc';
-                    return;
-                }
-            }
-            if (parseInt(data.producedQty) <= 0 || parseFloat(data.producedLength) <= 0 || parseFloat(data.workedHours) <= 0) {
-                 document.getElementById('message').textContent = 'Quantity, Length, and Hours must be greater than zero.';
-                 document.getElementById('message').style.backgroundColor = '#ffcccc';
+            // FIX: Check for all required fields first
+            if (!data.entryDate || !data.entryTime || !data.shift || !data.workerName || !data.fgPartNo || !data.cableId || !data.producedQty || !data.producedLength || !data.qtyProducedHours) {
+                 document.getElementById('message').textContent = 'Please fill out all required fields.';
+                 document.getElementById('message').style.backgroundColor = '#FEE2E2';
+                 document.getElementById('message').style.color = '#B91C1C';
                  return;
             }
             
-            document.getElementById('message').style.backgroundColor = '#e6ffe6';
+            // FIX: Robust numerical validation (Quantity, Length, Hours)
+            const qty = parseFloat(data.producedQty);
+            const length = parseFloat(data.producedLength);
+            const hours = parseFloat(data.qtyProducedHours);
 
-            // Send the detailed data to the server
+            if (isNaN(qty) || qty <= 0 || !Number.isInteger(qty)) {
+                 document.getElementById('message').textContent = 'Produced Quantity must be a positive whole number.';
+                 document.getElementById('message').style.backgroundColor = '#FEE2E2';
+                 document.getElementById('message').style.color = '#B91C1C';
+                 return;
+            }
+            if (isNaN(length) || length <= 0) {
+                 document.getElementById('message').textContent = 'Length (M/F) must be a positive number.';
+                 document.getElementById('message').style.backgroundColor = '#FEE2E2';
+                 document.getElementById('message').style.color = '#B91C1C';
+                 return;
+            }
+            if (isNaN(hours) || hours <= 0) {
+                 document.getElementById('message').textContent = 'Hours must be a positive number.';
+                 document.getElementById('message').style.backgroundColor = '#FEE2E2';
+                 document.getElementById('message').style.color = '#B91C1C';
+                 return;
+            }
+
+            document.getElementById('message').style.backgroundColor = '#F0FFF4';
+            document.getElementById('message').style.color = '#059669';
+
             socket.emit('submit_output', data);
 
-            // DATA RETENTION: ONLY CLEAR QTY, LENGTH, AND HOURS
+            // Clear submitted data fields for a new entry
+            document.getElementById('fg-part-no').value = ''; 
+            document.getElementById('cable-id').value = ''; 
             document.getElementById('produced-qty').value = '';
             document.getElementById('produced-length').value = '';
-            document.getElementById('worked-hours').value = '';
+            document.getElementById('qty-produced-hours').value = '';
             
             document.getElementById('message').textContent = 'Output submitted successfully! Ready for next entry.';
             setTimeout(() => { document.getElementById('message').textContent = ''; }, 3000); 
+        }
+
+        if (machineNameInput.value.trim()) {
+            joinMachineRoom();
         }
     </script>
 </body>
