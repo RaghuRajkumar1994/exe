@@ -229,7 +229,7 @@
             
             <div class="data-entry-container">
                 
-                <div class="card bg-indigo-50 border border-indigo-200">
+                <div id="connection-card" class="card bg-indigo-50 border border-indigo-200">
                     <h2 class="text-xl font-semibold text-gray-700 mb-4">Connection Status</h2>
                     <div class="input-row items-end">
                         <div style="flex-grow: 2;">
@@ -350,6 +350,7 @@
         const roomStatus = document.getElementById('room-status');
         const planDataView = document.getElementById('plan-data-view');
         const currentPlanMachine = document.getElementById('current-plan-machine');
+        const connectionCard = document.getElementById('connection-card'); // NEW: Get the card element
         
         // --- UPDATED VARIABLES FOR TOAST ---
         const messageBox = document.getElementById('toast-container'); // Points to the new toast box
@@ -378,13 +379,17 @@
                 socket.emit('join_machine_room', { machineName: machineName });
                 roomStatus.textContent = `Attempting to connect to room: ${machineName}...`;
                 roomStatus.className = 'text-sm mt-2 font-medium text-amber-600';
+                // NEW: Set card to connecting style
+                connectionCard.className = 'card bg-amber-50 border border-amber-200'; 
             } else {
                 roomStatus.textContent = 'Please select a Machine Name from the list.';
                 roomStatus.className = 'text-sm mt-2 font-medium text-red-600';
+                // NEW: Set card to error style
+                connectionCard.className = 'card bg-red-50 border border-red-200'; 
             }
         }
         
-        // --- SocketIO Listener for Plan Update ---
+        // --- SocketIO Listener for Plan Update (SUCCESSFUL CONNECTION) ---
         socket.on('update_worker_plan', (data) => {
             const plan = data.plan;
             const machineName = data.machineName;
@@ -394,11 +399,22 @@
             roomStatus.className = 'text-sm mt-2 font-medium text-green-600';
             currentPlanMachine.textContent = machineName;
             
+            // NEW: Set card to success/online style
+            connectionCard.className = 'card bg-green-50 border border-green-200'; 
+
             if (plan && plan.length > 0) {
                 renderPlanTable(plan);
             } else {
                 planDataView.innerHTML = `<p class="text-gray-500 italic">${message || 'No active plan found for this machine.'}</p>`;
             }
+        });
+
+        // --- NEW: SocketIO Listener for Disconnect/Offline Status ---
+        socket.on('disconnect', () => {
+            roomStatus.textContent = `**DISCONNECTED:** Lost connection to server. Please reconnect.`;
+            roomStatus.className = 'text-sm mt-2 font-medium text-red-600';
+            currentPlanMachine.textContent = 'N/A';
+            connectionCard.className = 'card bg-red-50 border border-red-200';
         });
 
         // --- Message Box Functionality ---

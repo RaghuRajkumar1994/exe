@@ -94,6 +94,22 @@
             line-height: 1;
         }
         /* ================================ */
+        
+        /* The CSS dots are only included for completeness, as we use emojis 
+           in the select options for cross-browser compatibility. */
+        .status-dot {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .dot-online {
+            background-color: #10B981; /* Green-500 from Tailwind */
+        }
+        .dot-offline {
+            background-color: #EF4444; /* Red-500 from Tailwind */
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -108,8 +124,10 @@
             
             <div>
                 <label for="modal-target-machine" class="block text-xs font-medium text-gray-600 mb-1">Target Machine:</label>
-                <input type="text" id="modal-target-machine" placeholder="W_CUT_01" required 
-                       class="w-full p-2 border border-gray-300 rounded-md text-sm uppercase focus:ring-purple-500 focus:border-purple-500">
+                <select id="modal-target-machine" required 
+                        class="w-full p-2 border border-gray-300 rounded-md text-sm uppercase focus:ring-purple-500 focus:border-purple-500">
+                    <option value="">Select a Machine</option>
+                    </select>
             </div>
             
             <div>
@@ -144,7 +162,10 @@
                 </div>
                 <div>
                     <label for="target-machine" class="block text-sm font-medium text-gray-600 mb-1">Target Machine:</label>
-                    <input type="text" id="target-machine" name="target_machine" placeholder="e.g., W_CUT_01" required class="w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 uppercase">
+                    <select id="target-machine" name="target_machine" required 
+                            class="w-full p-2 border border-gray-300 rounded-md text-sm uppercase focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select a Machine</option>
+                        </select>
                     <p class="text-xs text-gray-500 mt-1">Machine name must match worker's input.</p>
                 </div>
                 <div>
@@ -227,18 +248,71 @@
         const uploadStatusElement = document.getElementById('upload-status');
         const planUploadForm = document.getElementById('plan-upload-form');
         const messageModal = document.getElementById('message-modal');
-        const modalMachineInput = document.getElementById('modal-target-machine');
+        const modalMachineSelect = document.getElementById('modal-target-machine'); 
         const modalMessageTextarea = document.getElementById('modal-message-text');
         const messageStatusElement = document.getElementById('message-status');
+        const targetMachineSelect = document.getElementById('target-machine'); 
         
         let machineQtyChart = null; 
+        
+        // --- Machine List ---
+        const machineList = [
+            "AUM-002",
+            "AUM-003",
+            "AUM-009",
+            "AUM-001",
+            "AUM-010",
+            "AUM-005",
+            "AUM-011",
+            "AUM-012"
+        ];
+        
+        // --- Function to populate the select dropdowns with machine list and REAL status ---
+        function populateMachineSelects(onlineMachines = []) {
+            const selectElements = [targetMachineSelect, modalMachineSelect];
+            
+            selectElements.forEach(select => {
+                let selectedValue = select.value;
+                
+                // Clear existing options, but keep the first one (the placeholder)
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+
+                machineList.forEach((machine) => {
+                    // CRITICAL FIX LOGIC: Status is determined by inclusion in the onlineMachines array
+                    const isOnline = onlineMachines.includes(machine); 
+
+                    const statusText = isOnline ? 'ONLINE' : 'OFFLINE';
+                    const statusEmoji = isOnline ? '🟢' : '🔴';
+                    
+                    const option = document.createElement('option');
+                    option.value = machine;
+                    // Use emoji for visual status since native <option> does not support complex HTML/CSS dots
+                    option.textContent = `${statusEmoji} ${machine} (${statusText})`; 
+                    
+                    select.appendChild(option);
+                });
+                
+                // Restore the selected value if it exists
+                if (selectedValue) {
+                    select.value = selectedValue;
+                }
+            });
+        }
+
 
         // --- File Upload Handler ---
         planUploadForm.addEventListener('submit', async function(event) {
             event.preventDefault();
             
-            const targetMachineInput = document.getElementById('target-machine');
-            targetMachineInput.value = targetMachineInput.value.trim().toUpperCase(); 
+            const selectedMachine = targetMachineSelect.value;
+            
+            if (!selectedMachine) {
+                uploadStatusElement.textContent = 'Upload failed: Please select a target machine.';
+                uploadStatusElement.className = 'mt-4 text-sm font-medium text-center text-red-600';
+                return;
+            }
 
             uploadStatusElement.textContent = 'Uploading and processing file...';
             uploadStatusElement.className = 'mt-4 text-sm font-medium text-center text-blue-600';
@@ -269,23 +343,22 @@
             document.getElementById('plan-sheet').value = '';
         });
 
-        // --- NEW: Toggle Modal Visibility ---
+        // --- Toggle Modal Visibility ---
         function toggleMessageModal(show) {
             messageModal.style.display = show ? 'flex' : 'none';
             if (show) {
-                modalMachineInput.focus();
-                // Clear status when opening
+                modalMachineSelect.focus();
                 showMessageStatus('', ''); 
             }
         }
         
-        // --- NEW: Send Message Function (called from modal button) ---
+        // --- Send Message Function (called from modal button) ---
         function sendMessageFromModal() {
-            const machineName = modalMachineInput.value.trim().toUpperCase();
+            const machineName = modalMachineSelect.value.trim().toUpperCase(); 
             const messageText = modalMessageTextarea.value.trim();
 
             if (!machineName) {
-                showMessageStatus('Error: Please enter a Target Machine Name.', 'text-red-600');
+                showMessageStatus('Error: Please select a Target Machine Name.', 'text-red-600');
                 return;
             }
             if (!messageText) {
@@ -301,9 +374,7 @@
                 sender: 'Dashboard'
             });
 
-            // Clear the text area after sending
             modalMessageTextarea.value = '';
-            // Keep modal open to show status
         }
         
         // --- Utility to show message status inside the modal ---
@@ -476,6 +547,10 @@
             
             dateFilter.addEventListener('change', requestDataForDate);
             
+            // Populate the machine selects on load (initially with no machines online)
+            // It will be immediately updated by broadcast_online_status() on connect
+            populateMachineSelects(); 
+            
             // Request initial data when the dashboard loads
             requestDataForDate();
         });
@@ -491,6 +566,18 @@
                  showMessageStatus(`Message sent to ${data.machineName}.`, 'text-green-600');
              } else {
                  showMessageStatus(`Failed to send message to ${data.machineName}: ${data.reason}`, 'text-red-600');
+             }
+        });
+        
+        // --- Socket.IO Listener for Machine Status Update ---
+        socket.on('update_machine_status', (data) => {
+             // This event is now emitted by server.py whenever a machine connects/disconnects.
+             if (data && Array.isArray(data.onlineMachines)) {
+                populateMachineSelects(data.onlineMachines);
+             } else {
+                console.error("Received invalid machine status data:", data);
+                // Fallback to update with an empty array (all offline)
+                populateMachineSelects([]);
              }
         });
 

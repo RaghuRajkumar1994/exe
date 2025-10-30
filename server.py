@@ -1,5 +1,5 @@
 from flask import Flask, render_template_string, redirect, url_for, Response, request
-from flask_socketio import SocketIO, join_room
+from flask_socketio import SocketIO, join_room, leave_room
 import eventlet
 from datetime import datetime
 import pandas as pd
@@ -21,7 +21,18 @@ socketio = SocketIO(app, async_mode='eventlet')
 # --- Data Storage (In-memory) ---
 SUBMISSION_LOG = [] 
 MACHINE_PLANS = {} 
+# Dictionary to track which client (sid) belongs to which machine
 SID_TO_MACHINE = {}
+
+# --- NEW: Function to broadcast the online machine list ---
+def broadcast_online_status():
+    """Calculates the list of unique online machines and broadcasts it to all clients."""
+    # Get a unique set of all machine names currently connected
+    online_machines = list(set(SID_TO_MACHINE.values()))
+    
+    print(f"Currently online machines: {online_machines}")
+    # The dashboard listens for 'update_machine_status'
+    socketio.emit('update_machine_status', {'onlineMachines': online_machines})
 
 # --- Helper Function to Get Data by Date ---
 def get_data_for_date(date_str):
@@ -69,7 +80,13 @@ def broadcast_data(date_str=None):
         }
         data_to_send.append(clean_entry)
         
-        machine_qty_totals[entry['machine_name']] += entry['produced_qty']
+        # Ensure quantity is treated as an integer for summation
+        try:
+             qty = int(entry['produced_qty'])
+        except ValueError:
+             qty = 0
+             
+        machine_qty_totals[entry['machine_name']] += qty
 
     chart_data = [{'machine': k, 'total_qty': v} for k, v in machine_qty_totals.items()]
 
@@ -86,7 +103,6 @@ def broadcast_data(date_str=None):
 def worker_page():
     """Serves the worker input interface."""
     try:
-        # Use existing worker.html content
         with open('worker.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
         return render_template_string(html_content)
@@ -97,7 +113,6 @@ def worker_page():
 def dashboard_page():
     """Serves the live dashboard interface."""
     try:
-        # Use existing dashboard.html content
         with open('dashboard.html', 'r', encoding='utf-8') as f:
             html_content = f.read()
         return render_template_string(html_content)
@@ -125,11 +140,18 @@ def upload_plan():
         file_stream = io.BytesIO(excel_file.read())
         df = pd.read_excel(file_stream, sheet_name=0)
         df = df.astype(str)
-        plan_data = df.head(10).to_dict('records')
-
-        MACHINE_PLANS[target_machine] = plan_data
         
-        socketio.emit('update_worker_plan', {'plan': plan_data, 'machineName': target_machine}, room=target_machine)
+        plan_data_raw = df.head(10).to_dict('records')
+        plan_data_processed = []
+        for i, item in enumerate(plan_data_raw):
+            item['line_id'] = f"{target_machine}_{i+1}" 
+            item['status'] = 'pending' # Default status
+            plan_data_processed.append(item)
+        
+        MACHINE_PLANS[target_machine] = plan_data_processed
+        
+        # Broadcast the new, correctly formatted plan
+        socketio.emit('update_worker_plan', {'plan': plan_data_processed, 'machineName': target_machine}, room=target_machine)
 
         broadcast_data(datetime.now().strftime('%Y-%m-%d'))
         
@@ -153,11 +175,10 @@ def export_data():
     
     rows = []
     sorted_log = sorted(SUBMISSION_LOG, key=lambda x: x['datetime'])
-
     for entry in sorted_log:
         rows.append({
             'Date/Time': entry['datetime'].strftime("%Y-%m-%d %H:%M:%S"),
-            'Shift': entry['shift'], 
+            'Shift': entry['shift'],
             'Worker Name': entry['worker_name'],
             'Machine Name': entry['machine_name'],
             'FG Part Number': entry['fg_part_no'],
@@ -166,9 +187,8 @@ def export_data():
             'Produced Length': entry['produced_length'],
             'QTY PRODUCED HOURS': entry['qty_produced_hours']
         })
-
+        
     df = pd.DataFrame(rows, columns=FIELD_NAMES)
-
     csv_data = df.to_csv(index=False, encoding='utf-8-sig')
     
     response = Response(
@@ -181,95 +201,79 @@ def export_data():
     )
     return response
 
-
 # --- Socket.IO Event Handlers ---
+
+@socketio.on('submit_output')
+def handle_submit_output(data):
+    """Handles production data submission from the worker interface."""
+    try:
+        data['datetime'] = datetime.strptime(f"{data['entry_date']} {data['entry_time']}", "%Y-%m-%d %H:%M")
+        data['produced_qty'] = data['produced_qty']
+        data['produced_length'] = data['produced_length']
+        data['qty_produced_hours'] = data['qty_produced_hours']
+        SUBMISSION_LOG.append(data)
+        
+        # Broadcast the updated log to the dashboard
+        broadcast_data(data['datetime'].strftime('%Y-%m-%d'))
+        
+        # Acknowledge success to the worker (sender only)
+        socketio.emit('submission_ack', {'success': True}, room=request.sid)
+
+    except Exception as e:
+        print(f"Error processing submission: {e}")
+        socketio.emit('submission_ack', {'success': False, 'message': str(e)}, room=request.sid)
 
 @socketio.on('join_machine_room')
 def handle_join_machine_room(data):
     """Worker joins a room based on their machine name."""
     machine_name = data.get('machineName')
-    
     if machine_name:
         join_room(machine_name)
+        # Store the client ID and the machine name
         SID_TO_MACHINE[request.sid] = machine_name
         print(f"Client {request.sid} joined room: {machine_name}")
         
+        # 1. Send the active plan to the worker
         if machine_name in MACHINE_PLANS:
             plan_data = MACHINE_PLANS[machine_name]
+            # Send the plan to the specific client
             socketio.emit('update_worker_plan', {'plan': plan_data, 'machineName': machine_name}, room=request.sid)
         else:
             socketio.emit('update_worker_plan', {'plan': [], 'machineName': machine_name, 'message': 'No active plan found.'}, room=request.sid)
+        
+        # 2. IMPORTANT: Update the connection status on the dashboard
+        broadcast_online_status() 
 
-# -------------------------------------
-# New Socket Event: Send Message to Machine
-# -------------------------------------
+
 @socketio.on('send_message_to_machine')
 def handle_send_message(data):
-    """Sends a text message to a specific machine's room."""
+    """Handles sending a message from the dashboard to a specific machine room."""
     machine_name = data.get('machineName')
-    message_text = data.get('message')
-    sender = data.get('sender', 'System')
+    message = data.get('message')
     
-    if not machine_name or not message_text:
-        # Send failure confirmation back to the sender (dashboard)
-        socketio.emit('message_sent_confirm', {
-            'success': False, 
-            'machineName': machine_name, 
-            'reason': 'Missing machine name or message text'
-        }, room=request.sid)
-        return
+    # Check if the machine is currently online (has a client SID in its room)
+    # We can check if the machine_name is in the values of SID_TO_MACHINE
+    if machine_name in SID_TO_MACHINE.values():
+        socketio.emit('receive_message', {'message': message, 'sender': data.get('sender', 'Dashboard')}, room=machine_name)
+        socketio.emit('message_sent_confirm', {'success': True, 'machineName': machine_name}, room=request.sid)
+    else:
+        socketio.emit('message_sent_confirm', {'success': False, 'machineName': machine_name, 'reason': 'Machine is not connected/offline.'}, room=request.sid)
 
-    # 1. Broadcast the message to the specific machine room (room=machine_name)
-    message_data = {
-        'sender': sender,
-        'message': message_text
-    }
+@socketio.on('update_plan_status')
+def handle_update_plan_status(data):
+    """Updates the status of a specific line item in the machine's plan."""
+    machine_name = data.get('machineName')
+    line_id = data.get('lineId')
     
-    socketio.emit('receive_message', message_data, room=machine_name)
-    
-    # 2. Send success confirmation back to the sender (dashboard)
-    socketio.emit('message_sent_confirm', {
-        'success': True, 
-        'machineName': machine_name
-    }, room=request.sid)
-
-@socketio.on('submit_output')
-def handle_output_submission(data):
-    """Handles new output submissions with detailed fields."""
-    global SUBMISSION_LOG
-    
-    entry_datetime = datetime.strptime(f"{data.get('entryDate')} {data.get('entryTime')}", "%Y-%m-%d %H:%M")
-    shift = data.get('shift', 'N/A')
-    worker_name = data.get('workerName', 'N/A')
-    machine_name = data.get('machineName', 'N/A')
-    fg_part_no = data.get('fgPartNo', 'N/A')
-    cable_id = data.get('cableId', 'N/A')
-    
-    try:
-        produced_qty_val = int(data.get('producedQty'))
-        produced_length_val = float(data.get('producedLength'))
-        qty_produced_hours_val = float(data.get('qtyProducedHours')) 
-        
-        if produced_qty_val <= 0 or produced_length_val <= 0 or qty_produced_hours_val <= 0: return 
-    except Exception as e:
-        print(f"Error converting data: {e}")
-        return 
-
-    new_entry = {
-        'datetime': entry_datetime,
-        'worker_name': worker_name,
-        'shift': shift,
-        'machine_name': machine_name,
-        'fg_part_no': fg_part_no,
-        'cable_id': cable_id,
-        'produced_qty': produced_qty_val,
-        'produced_length': produced_length_val,
-        'qty_produced_hours': qty_produced_hours_val
-    }
-    
-    SUBMISSION_LOG.insert(0, new_entry)
-
-    broadcast_data(date_str=entry_datetime.strftime('%Y-%m-%d'))
+    if machine_name in MACHINE_PLANS:
+        plan = MACHINE_PLANS[machine_name]
+        for item in plan:
+            if item.get('line_id') == line_id:
+                item['status'] = 'completed'
+                # Broadcast the updated plan to that machine's room
+                socketio.emit('update_worker_plan', {'plan': plan, 'machineName': machine_name}, room=machine_name)
+                return
+        print(f"Error: Could not find line_id {line_id} in plan for {machine_name}")
 
 
 @socketio.on('request_date_data')
@@ -283,15 +287,29 @@ def handle_date_request(data):
 def handle_connect():
     """Sends the current data when a client connects."""
     if request.path == '/dashboard':
+        # Dashboard connects: send log data
         broadcast_data(date_str=datetime.now().strftime('%Y-%m-%d')) 
+        # Dashboard connects: send current machine status (NEW)
+        broadcast_online_status()
 
-# --- Start the Server ---
+# -------------------------------------
+# NEW Socket Event: Disconnect Handler (Crucial for online/offline tracking)
+# -------------------------------------
+@socketio.on('disconnect')
+def handle_disconnect():
+    """Removes the disconnected client from the SID_TO_MACHINE map and updates status."""
+    if request.sid in SID_TO_MACHINE:
+        machine_name = SID_TO_MACHINE.pop(request.sid)
+        print(f"Client {request.sid} disconnected from room: {machine_name}")
+        
+        # IMPORTANT: Update the status on the dashboard since a machine may have gone offline
+        broadcast_online_status()
+
+# --- Start the Server ---\
 
 if __name__ == '__main__':
     print("Starting Flask-SocketIO Server...")
-    # NOTE: host='0.0.0.0' allows access from other devices on your local network (LAN)
-    print(f"Worker Input Page: http://10.10.2.230:5000/worker (e.g., http://<YOUR_SERVER_IP>:5000/worker)")
-    print(f"Live Dashboard: http://10.10.2.230:5000/dashboard (e.g., http://<YOUR_SERVER_IP>:5000/dashboard)")
-    
-    # If you see WinError 10048, change port=5000 to port=5001
-    socketio.run(app, host='0.0.0.0', port=5000)
+    print(f"Worker Input Page: http://10.10.2.230:5000/worker (e.g., set this to your worker tablet's home screen)")
+    print(f"Dashboard Page: http://10.10.2.230:5000/dashboard (e.g., set this to your supervisor's screen)")
+    # eventlet is recommended for production deployment
+    socketio.run(app, host='0.0.0.0', port=5000, debug=False)
