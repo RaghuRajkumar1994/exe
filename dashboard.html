@@ -234,11 +234,11 @@
                 </table>
             </div>
         </div>
+
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
-    
     <script>
         const socket = io();
         const logTableBody = document.getElementById('log-table-body');
@@ -248,32 +248,26 @@
         const uploadStatusElement = document.getElementById('upload-status');
         const planUploadForm = document.getElementById('plan-upload-form');
         const messageModal = document.getElementById('message-modal');
-        const modalMachineSelect = document.getElementById('modal-target-machine'); 
+        const modalMachineSelect = document.getElementById('modal-target-machine');
         const modalMessageTextarea = document.getElementById('modal-message-text');
         const messageStatusElement = document.getElementById('message-status');
-        const targetMachineSelect = document.getElementById('target-machine'); 
-        
-        let machineQtyChart = null; 
-        
+        const targetMachineSelect = document.getElementById('target-machine');
+        let machineQtyChart = null;
+
+
         // --- Machine List ---
-        const machineList = [
-            "AUM-002",
-            "AUM-003",
-            "AUM-009",
-            "AUM-001",
-            "AUM-010",
-            "AUM-005",
-            "AUM-011",
-            "AUM-012"
+        const machineList = [ 
+            "AUM-002", "AUM-003", "AUM-009", "AUM-001", 
+            "AUM-010", "AUM-005", "AUM-011", "AUM-012" 
         ];
-        
+
         // --- Function to populate the select dropdowns with machine list and REAL status ---
         function populateMachineSelects(onlineMachines = []) {
             const selectElements = [targetMachineSelect, modalMachineSelect];
             
             selectElements.forEach(select => {
                 let selectedValue = select.value;
-                
+
                 // Clear existing options, but keep the first one (the placeholder)
                 while (select.options.length > 1) {
                     select.remove(1);
@@ -281,273 +275,221 @@
 
                 machineList.forEach((machine) => {
                     // CRITICAL FIX LOGIC: Status is determined by inclusion in the onlineMachines array
-                    const isOnline = onlineMachines.includes(machine); 
-
+                    const isOnline = onlineMachines.includes(machine);
                     const statusText = isOnline ? 'ONLINE' : 'OFFLINE';
                     const statusEmoji = isOnline ? '🟢' : '🔴';
                     
                     const option = document.createElement('option');
                     option.value = machine;
                     // Use emoji for visual status since native <option> does not support complex HTML/CSS dots
-                    option.textContent = `${statusEmoji} ${machine} (${statusText})`; 
+                    option.textContent = `${statusEmoji} ${machine} (${statusText})`;
+                    
+                    // Highlight online machines in the selection
+                    if (isOnline) {
+                         option.style.backgroundColor = '#ecfdf5'; // Green-50
+                    }
                     
                     select.appendChild(option);
                 });
                 
-                // Restore the selected value if it exists
+                // Restore selection after update
                 if (selectedValue) {
                     select.value = selectedValue;
                 }
             });
         }
 
-
-        // --- File Upload Handler ---
-        planUploadForm.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            
-            const selectedMachine = targetMachineSelect.value;
-            
-            if (!selectedMachine) {
-                uploadStatusElement.textContent = 'Upload failed: Please select a target machine.';
-                uploadStatusElement.className = 'mt-4 text-sm font-medium text-center text-red-600';
-                return;
-            }
-
-            uploadStatusElement.textContent = 'Uploading and processing file...';
-            uploadStatusElement.className = 'mt-4 text-sm font-medium text-center text-blue-600';
+        // --- Plan Upload Form Submission ---
+        planUploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
             
             const formData = new FormData(this);
-            
+            uploadStatusElement.textContent = 'Uploading and processing plan...';
+            uploadStatusElement.className = 'mt-4 text-sm font-medium text-center text-indigo-600';
+
             try {
                 const response = await fetch('/upload_plan', {
                     method: 'POST',
                     body: formData
                 });
 
-                const result = await response.text();
-                
-                if (response.ok) {
-                    uploadStatusElement.textContent = result;
-                    uploadStatusElement.className = 'mt-4 text-sm font-medium text-center text-green-600';
-                } else {
-                    uploadStatusElement.textContent = `Upload failed: ${result}`;
-                    uploadStatusElement.className = 'mt-4 text-sm font-medium text-center text-red-600';
-                }
+                const resultText = await response.text();
 
+                if (response.ok) {
+                    uploadStatusElement.textContent = resultText; // Success message from server
+                    uploadStatusElement.className = 'mt-4 text-sm font-bold text-center text-green-600';
+                    // Optional: Clear file input and reset select after success
+                    document.getElementById('plan-sheet').value = ''; 
+                    targetMachineSelect.value = '';
+                } else {
+                    uploadStatusElement.textContent = `Upload Failed: ${resultText}`;
+                    uploadStatusElement.className = 'mt-4 text-sm font-bold text-center text-red-600';
+                }
             } catch (error) {
-                uploadStatusElement.textContent = `A network error occurred: ${error.message}`;
-                uploadStatusElement.className = 'mt-4 text-sm font-medium text-center text-red-600';
+                console.error('Network Error:', error);
+                uploadStatusElement.textContent = 'A network error occurred during upload.';
+                uploadStatusElement.className = 'mt-4 text-sm font-bold text-center text-red-600';
             }
-            
-            document.getElementById('plan-sheet').value = '';
         });
 
-        // --- Toggle Modal Visibility ---
-        function toggleMessageModal(show) {
-            messageModal.style.display = show ? 'flex' : 'none';
-            if (show) {
-                modalMachineSelect.focus();
-                showMessageStatus('', ''); 
-            }
-        }
-        
-        // --- Send Message Function (called from modal button) ---
-        function sendMessageFromModal() {
-            const machineName = modalMachineSelect.value.trim().toUpperCase(); 
-            const messageText = modalMessageTextarea.value.trim();
-
-            if (!machineName) {
-                showMessageStatus('Error: Please select a Target Machine Name.', 'text-red-600');
-                return;
-            }
-            if (!messageText) {
-                showMessageStatus('Error: Message text cannot be empty.', 'text-red-600');
-                return;
-            }
-
-            showMessageStatus(`Sending message to ${machineName}...`, 'text-blue-600');
-
-            socket.emit('send_message_to_machine', { 
-                machineName: machineName, 
-                message: messageText, 
-                sender: 'Dashboard'
-            });
-
-            modalMessageTextarea.value = '';
-        }
-        
-        // --- Utility to show message status inside the modal ---
-        function showMessageStatus(text, colorClass) {
-            clearTimeout(messageStatusElement.timer);
-            messageStatusElement.textContent = text;
-            messageStatusElement.className = `text-xs font-medium text-center mt-2 ${colorClass}`;
-            messageStatusElement.classList.remove('hidden');
-            
-            if (text) {
-                 messageStatusElement.timer = setTimeout(() => { 
-                    messageStatusElement.classList.add('hidden'); 
-                 }, 5000);
-            }
-        }
-
-        // Generates consistent colors for the bar chart
-        function generateColors(count) {
-            const colors = [
-                'rgba(16, 185, 129, 0.8)', 
-                'rgba(99, 102, 241, 0.8)',
-                'rgba(245, 158, 11, 0.8)',
-                'rgba(239, 68, 68, 0.8)', 
-                'rgba(139, 92, 246, 0.8)', 
-                'rgba(249, 115, 22, 0.8)', 
-                'rgba(6, 182, 212, 0.8)',  
-                'rgba(75, 85, 99, 0.8)',
-            ];
-            return Array.from({ length: count }, (_, i) => colors[i % colors.length]);
-        }
-
-        // Renders or updates the Chart.js visualization
-        function updateChart(chartData) {
-            const labels = chartData.map(item => item.machine);
-            const quantities = chartData.map(item => item.total_qty);
-            const backgroundColors = generateColors(labels.length);
-
-            if (machineQtyChart) {
-                machineQtyChart.destroy();
-            }
-            
-            if (labels.length === 0) { return; }
-
-            const ctx = document.getElementById('machine-qty-chart').getContext('2d');
-            machineQtyChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Total Qty Produced',
-                        data: quantities,
-                        backgroundColor: backgroundColors,
-                        borderColor: backgroundColors.map(c => c.replace('0.8', '1')),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Quantity (Units)'
-                            }
-                        },
-                        x: {
-                             title: {
-                                display: true,
-                                text: 'Machine Name'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: { display: false },
-                        title: { display: false }
-                    }
-                }
-            });
-        }
-        
-        // Updates the summary table for Qty, Length, and Hours
-        function updateTotalsTable(logEntries) {
-            let totalQty = 0;
-            let totalLength = 0;
-            let totalProducedHours = 0;
-            
-            logEntries.forEach(entry => {
-                totalQty += parseInt(entry.produced_qty || 0);
-                totalLength += parseFloat(entry.produced_length || 0);
-                totalProducedHours += parseFloat(entry.qty_produced_hours || 0);
-            });
-            
-            totalsTableBody.innerHTML = '';
-            
-            const totals = [
-                { metric: 'Total Qty', value: totalQty.toFixed(0) },
-                { metric: 'Total Length', value: totalLength.toFixed(1) + ' M/F' },
-                { metric: 'Total Qty Produced Hours', value: totalProducedHours.toFixed(1) + ' Hrs' }
-            ];
-            
-            if (logEntries.length === 0) {
-                totalsTableBody.innerHTML = '<tr><td colspan="2" class="px-4 py-4 text-sm text-gray-500">No data available for totals.</td></tr>';
-                return;
-            }
-
-            totals.forEach(total => {
-                const row = totalsTableBody.insertRow();
-                row.className = "hover:bg-gray-50";
-                row.insertCell().textContent = total.metric;
-                
-                const valueCell = row.insertCell();
-                valueCell.className = "font-semibold";
-                valueCell.textContent = total.value;
-            });
-        }
-
-        // Main function to update the dashboard display
-        function updateDisplay(data) {
-            logTableBody.innerHTML = ''; 
-            const logEntries = data.log || [];
-            const chartData = data.chart_data || [];
-            
-            totalSubmissionsElement.textContent = `Total Entries Displayed: ${logEntries.length}`;
-
-            // --- 1. Update Chart ---
-            updateChart(chartData);
-
-            // --- 2. Update Totals Table ---
-            updateTotalsTable(logEntries);
-
-            // --- 3. Update Detail Log Table ---
-            if (logEntries.length === 0) {
-                 logTableBody.innerHTML = '<tr><td colspan="9" class="px-4 py-4 text-sm text-gray-500">No production data found for this date.</td></tr>'; 
-                 return;
-            }
-
-            logEntries.forEach((entry) => {
-                const row = logTableBody.insertRow();
-                row.className = "hover:bg-gray-50";
-                
-                row.insertCell().textContent = entry.time_display; 
-                row.insertCell().textContent = entry.shift; 
-                row.insertCell().textContent = entry.worker_name;
-                row.insertCell().textContent = entry.machine_name;
-                row.insertCell().textContent = entry.fg_part_no;
-                row.insertCell().textContent = entry.cable_id;
-                row.insertCell().textContent = entry.produced_qty;
-                row.insertCell().textContent = entry.produced_length;
-                row.insertCell().textContent = entry.qty_produced_hours; 
-            });
-        }
-        
-        // Function to request data for a specific date (used by the filter)
+        // --- Date Filter Logic ---
         function requestDataForDate() {
             const selectedDate = dateFilter.value;
-            socket.emit('request_date_data', { date: selectedDate });
-        }
-        
-        // Function to export all data (links directly to the server's /export route)
-        function exportData() {
-            window.location.href = '/export';
+            // Send request to server to filter data
+            socket.emit('request_dashboard_data', { date: selectedDate });
         }
 
-        // Set the default date filter to today and attach listener
+        dateFilter.addEventListener('change', requestDataForDate);
+
+        // Set initial date filter to today
         document.addEventListener('DOMContentLoaded', () => {
             const today = new Date().toISOString().split('T')[0];
             dateFilter.value = today;
+        });
+
+        // --- Data Update Handler ---
+        function updateDisplay(data) {
+            // Update Log Table
+            let logHTML = data.log.length > 0 ? '' : '<tr><td colspan="9" class="px-4 py-4 text-sm text-gray-500 text-center">No production data found for this date.</td></tr>';
             
-            dateFilter.addEventListener('change', requestDataForDate);
+            let totalQty = 0;
+            let totalLength = 0;
+            let totalHours = 0;
+
+            data.log.forEach(entry => {
+                logHTML += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.time_display}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.shift}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.worker_name}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800 font-semibold">${entry.machine_name}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.fg_part_no}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.cable_id}</td>
+                        <td class="px-4 py-2 text-sm text-green-700 font-bold">${entry.produced_qty}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.produced_length}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.qty_produced_hours}</td>
+                    </tr>
+                `;
+                totalQty += parseInt(entry.produced_qty) || 0;
+                totalLength += parseFloat(entry.produced_length) || 0;
+                totalHours += parseFloat(entry.qty_produced_hours) || 0;
+            });
+
+            logTableBody.innerHTML = logHTML;
+            totalSubmissionsElement.textContent = `Total Entries Displayed: ${data.log.length}`;
+
+            // Update Totals Table
+            let totalsHTML = `
+                <tr><td class="px-4 py-2 text-sm font-medium text-gray-700">Total Produced QTY</td><td class="px-4 py-2 text-sm font-bold text-green-600">${totalQty.toLocaleString()}</td></tr>
+                <tr><td class="px-4 py-2 text-sm font-medium text-gray-700">Total Length (M/F)</td><td class="px-4 py-2 text-sm font-bold text-blue-600">${totalLength.toFixed(1)}</td></tr>
+                <tr><td class="px-4 py-2 text-sm font-medium text-gray-700">Total Production Hours</td><td class="px-4 py-2 text-sm font-bold text-red-600">${totalHours.toFixed(1)}</td></tr>
+            `;
+            totalsTableBody.innerHTML = totalsHTML;
+
+            // Update Chart
+            updateChart(data.chart_data);
             
-            // Populate the machine selects on load (initially with no machines online)
+            // Note: Machine selects are updated via 'update_machine_status' event
+        }
+
+        function updateChart(chartData) {
+            const ctx = document.getElementById('machine-qty-chart').getContext('2d');
+            
+            const labels = chartData.map(item => item.machine);
+            const data = chartData.map(item => item.total_qty);
+            const colors = labels.map(() => `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`);
+            const borderColors = colors.map(c => c.replace('0.6', '1'));
+
+            if (machineQtyChart) {
+                machineQtyChart.data.labels = labels;
+                machineQtyChart.data.datasets[0].data = data;
+                machineQtyChart.data.datasets[0].backgroundColor = colors;
+                machineQtyChart.data.datasets[0].borderColor = borderColors;
+                machineQtyChart.update();
+            } else {
+                machineQtyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Total Quantity',
+                            data: data,
+                            backgroundColor: colors,
+                            borderColor: borderColors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Quantity Produced'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        
+        // --- Export Function ---
+        function exportData() {
+            window.location.href = '/export';
+        }
+        
+        // --- Message Modal Functions ---
+        function toggleMessageModal(show) {
+            if (show) {
+                 messageModal.style.display = 'flex';
+                 // Ensure machine list is up-to-date before opening
+                 // The machine list is constantly updated by socket.on('update_machine_status')
+            } else {
+                 messageModal.style.display = 'none';
+                 showMessageStatus(''); // Clear status when closing
+            }
+        }
+        
+        function showMessageStatus(text, className) {
+            messageStatusElement.textContent = text;
+            messageStatusElement.className = `text-xs font-medium text-center mt-2 ${className}`;
+            messageStatusElement.style.display = 'block';
+             setTimeout(() => {
+                 messageStatusElement.style.display = 'none';
+             }, 5000);
+        }
+
+        function sendMessageFromModal() {
+            const targetMachine = modalMachineSelect.value;
+            const messageText = modalMessageTextarea.value.trim();
+            
+            if (!targetMachine || !messageText) {
+                showMessageStatus('Please select a machine and enter a message.', 'text-red-600');
+                return;
+            }
+            
+            showMessageStatus(`Sending message to ${targetMachine}...`, 'text-purple-600');
+            
+            socket.emit('send_live_message', {
+                targetMachine: targetMachine,
+                messageText: messageText
+            });
+            
+            // Clear message text area after sending attempt
+            modalMessageTextarea.value = '';
+        }
+        
+        // --- Socket.IO Connection and Events ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize machine selects (initially with no machines online)
             // It will be immediately updated by broadcast_online_status() on connect
             populateMachineSelects(); 
             
