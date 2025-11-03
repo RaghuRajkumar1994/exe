@@ -46,15 +46,16 @@ def get_data_for_date(date_str):
     except ValueError:
         return SUBMISSION_LOG
 
+    # Filter log entries that have the 'datetime' key and match the date
     filtered_log = [
         entry for entry in SUBMISSION_LOG 
-        if entry['datetime'].date() == filter_date
+        if entry.get('datetime') and entry['datetime'].date() == filter_date
     ]
     
     filtered_log.sort(key=lambda x: x['datetime'], reverse=True) 
     return filtered_log
 
-# --- Broadcast Function ---
+# --- Broadcast Function (UPDATED) ---
 def broadcast_data(date_str=None):
     """
     Broadcasts the data for the requested date to the dashboard.
@@ -68,26 +69,53 @@ def broadcast_data(date_str=None):
     machine_qty_totals = defaultdict(int) 
 
     for entry in log_to_send:
+        # Note: The server combines Measured and Manual into a single field for display/export
+        t1_crimp_height = entry.get('t1_crimp_height_manual') or entry.get('t1_crimp_height_measured')
+        t1_insulation_height = entry.get('t1_insulation_height_manual') or entry.get('t1_insulation_height_measured')
+        t1_crimp_width = entry.get('t1_crimp_width_manual') or entry.get('t1_crimp_width_measured')
+        t1_insulation_width = entry.get('t1_insulation_width_manual') or entry.get('t1_insulation_width_measured')
+        t1_pull_force = entry.get('t1_pull_force_manual') or entry.get('t1_pull_force_measured')
+        
+        t2_crimp_height = entry.get('t2_crimp_height_manual') or entry.get('t2_crimp_height_measured')
+        t2_insulation_height = entry.get('t2_insulation_height_manual') or entry.get('t2_insulation_height_measured')
+        t2_crimp_width = entry.get('t2_crimp_width_manual') or entry.get('t2_crimp_width_measured')
+        t2_insulation_width = entry.get('t2_insulation_width_manual') or entry.get('t2_insulation_width_measured')
+        t2_pull_force = entry.get('t2_pull_force_manual') or entry.get('t2_pull_force_measured')
+        
         clean_entry = {
             'time_display': entry['datetime'].strftime("%Y-%m-%d %H:%M:%S"),
-            'worker_name': entry['worker_name'],
-            'shift': entry['shift'], 
-            'machine_name': entry['machine_name'],
-            'fg_part_no': entry['fg_part_no'],
-            'cable_id': entry['cable_id'],
-            'produced_qty': entry['produced_qty'],
-            'produced_length': entry['produced_length'],
-            'qty_produced_hours': entry['qty_produced_hours']
+            'worker_name': entry.get('operator_name', 'N/A'), 
+            'shift': entry.get('shift', 'N/A'), 
+            'machine_name': entry.get('machine_name', 'N/A'),
+            'fg_part_no': entry.get('fg_part_no', 'N/A'),
+            'cable_id': entry.get('cable_id', 'N/A'),
+            'produced_qty': entry.get('produced_qty', 0),
+            'produced_length': entry.get('produced_length', 0.0),
+            'qty_produced_hours': entry.get('qty_produced_hours', 0.0),
+            # --- NEW TERMINAL FIELDS ADDED FOR DASHBOARD ---
+            't1_terminal_id': entry.get('t1_terminal_id', 'N/A'),
+            't1_crimp_height': t1_crimp_height,
+            't1_insulation_height': t1_insulation_height,
+            't1_crimp_width': t1_crimp_width,
+            't1_insulation_width': t1_insulation_width,
+            't1_pull_force': t1_pull_force,
+            't2_terminal_id': entry.get('t2_terminal_id', 'N/A'),
+            't2_crimp_height': t2_crimp_height,
+            't2_insulation_height': t2_insulation_height,
+            't2_crimp_width': t2_crimp_width,
+            't2_insulation_width': t2_insulation_width,
+            't2_pull_force': t2_pull_force
+            # ---------------------------------------------
         }
         data_to_send.append(clean_entry)
         
         # Ensure quantity is treated as an integer for summation
         try:
-             qty = int(entry['produced_qty'])
-        except ValueError:
+             qty = int(entry.get('produced_qty', 0))
+        except (ValueError, TypeError):
              qty = 0
              
-        machine_qty_totals[entry['machine_name']] += qty
+        machine_qty_totals[entry.get('machine_name', 'UNKNOWN')] += qty
 
     chart_data = [{'machine': k, 'total_qty': v} for k, v in machine_qty_totals.items()]
 
@@ -139,8 +167,10 @@ def upload_plan():
 
     try:
         file_stream = io.BytesIO(excel_file.read())
-        df = pd.read_excel(file_stream, sheet_name=0)
-        df = df.astype(str)
+        # Use header=0 to correctly read column names
+        df = pd.read_excel(file_stream, sheet_name=0, header=0) 
+        # Convert all relevant columns to string to prevent issues with mixed types
+        df = df.fillna('').astype(str)
         
         plan_data_raw = df.head(10).to_dict('records')
         plan_data_processed = []
@@ -164,38 +194,96 @@ def upload_plan():
         print(f"File processing error: {e}")
         return f"Error processing file: {str(e)}", 500
 
+# -------------------------------------
+# EXPORT DATA FUNCTION (UPDATED)
+# -------------------------------------
 @app.route('/export', methods=['GET'])
 def export_data():
-    """Exports all stored production data to a CSV file."""
-    FIELD_NAMES = [
-        'Date/Time', 'Shift', 'Worker Name', 'Machine Name', 
-        'FG Part Number', 'Cable Identification', 'Produced Qty', 
-        'Produced Length', 'QTY PRODUCED HOURS'
-    ]
+    """Exports all stored production data to a CSV file, including terminal data."""
+    
     rows = []
-    sorted_log = sorted(SUBMISSION_LOG, key=lambda x: x['datetime'])
+    sorted_log = sorted(SUBMISSION_LOG, key=lambda x: x.get('datetime', datetime.min)) 
 
     for entry in sorted_log:
-        rows.append({
-            'Date/Time': entry['datetime'].strftime("%Y-%m-%d %H:%M:%S"),
-            'Shift': entry['shift'],
-            'Worker Name': entry['worker_name'],
-            'Machine Name': entry['machine_name'],
-            'FG Part Number': entry['fg_part_no'],
-            'Cable Identification': entry['cable_id'],
-            'Produced Qty': entry['produced_qty'],
-            'Produced Length': entry['produced_length'],
-            'QTY PRODUCED HOURS': entry['qty_produced_hours']
-        })
+        if 'datetime' not in entry:
+            continue
+            
+        # Merge Measured and Manual data, preferring Manual if available
+        t1_crimp_height = entry.get('t1_crimp_height_manual') or entry.get('t1_crimp_height_measured')
+        t1_insulation_height = entry.get('t1_insulation_height_manual') or entry.get('t1_insulation_height_measured')
+        t1_crimp_width = entry.get('t1_crimp_width_manual') or entry.get('t1_crimp_width_measured')
+        t1_insulation_width = entry.get('t1_insulation_width_manual') or entry.get('t1_insulation_width_measured')
+        t1_pull_force = entry.get('t1_pull_force_manual') or entry.get('t1_pull_force_measured')
+        
+        t2_crimp_height = entry.get('t2_crimp_height_manual') or entry.get('t2_crimp_height_measured')
+        t2_insulation_height = entry.get('t2_insulation_height_manual') or entry.get('t2_insulation_height_measured')
+        t2_crimp_width = entry.get('t2_crimp_width_manual') or entry.get('t2_crimp_width_measured')
+        t2_insulation_width = entry.get('t2_insulation_width_manual') or entry.get('t2_insulation_width_measured')
+        t2_pull_force = entry.get('t2_pull_force_manual') or entry.get('t2_pull_force_measured')
 
-    df = pd.DataFrame(rows, columns=FIELD_NAMES)
-    csv_data = df.to_csv(index=False, encoding='utf-8-sig')
+
+        row = {
+            'datetime_obj': entry['datetime'],
+            'Shift': entry.get('shift', ''),
+            'Worker Name': entry.get('operator_name', ''), 
+            'Machine Name': entry.get('machine_name', ''),
+            'FG Part Number': entry.get('fg_part_no', ''),
+            'Cable Identification': entry.get('cable_id', ''),
+            'Produced Qty': entry.get('produced_qty', 0), 
+            'Produced Length': entry.get('produced_length', 0.0),
+            'QTY PRODUCED HOURS': entry.get('qty_produced_hours', 0.0),
+            # --- NEW TERMINAL FIELDS ADDED FOR EXPORT (Using the merged value) ---
+            'T1 Part No': entry.get('t1_terminal_id', ''),
+            'T1 Crimp H': t1_crimp_height,
+            'T1 Insul H': t1_insulation_height,
+            'T1 Crimp W': t1_crimp_width,
+            'T1 Insul W': t1_insulation_width,
+            'T1 Pull F (N)': t1_pull_force,
+            'T2 Part No': entry.get('t2_terminal_id', ''),
+            'T2 Crimp H': t2_crimp_height,
+            'T2 Insul H': t2_insulation_height,
+            'T2 Crimp W': t2_crimp_width,
+            'T2 Insul W': t2_insulation_width,
+            'T2 Pull F (N)': t2_pull_force
+            # ---------------------------------------------
+        }
+        rows.append(row)
+
+    if not rows:
+        return "No data to export", 204
+        
+    df = pd.DataFrame(rows)
+
+    # 2. Split the datetime_obj into separate 'Date' and 'Time' columns
+    if 'datetime_obj' in df.columns:
+        # Create new 'Date' and 'Time' columns at the start of the DataFrame
+        df.insert(0, 'Date', df['datetime_obj'].dt.strftime('%Y-%m-%d'))
+        df.insert(1, 'Time', df['datetime_obj'].dt.strftime('%H:%M:%S'))
+        
+        # Remove the original datetime object column
+        df = df.drop(columns=['datetime_obj'])
+
+    # 3. Define and reorder columns (including new terminal fields)
+    NEW_FIELD_NAMES = [
+        'Date', 'Time', 'Shift', 'Worker Name', 'Machine Name', 
+        'FG Part Number', 'Cable Identification', 'Produced Qty', 
+        'Produced Length', 'QTY PRODUCED HOURS',
+        'T1 Part No', 'T1 Crimp H', 'T1 Insul H', 'T1 Crimp W', 'T1 Insul W', 'T1 Pull F (N)',
+        'T2 Part No', 'T2 Crimp H', 'T2 Insul H', 'T2 Crimp W', 'T2 Insul W', 'T2 Pull F (N)'
+    ]
+    
+    # Filter the final columns to only include those that actually exist 
+    final_cols = [col for col in NEW_FIELD_NAMES if col in df.columns]
+    df = df[final_cols]
+    
+    # 4. Generate CSV
+    csv_data = df.to_csv(index=False, encoding='utf-8-sig', quoting=csv.QUOTE_ALL)
 
     response = Response(
         csv_data,
         mimetype="text/csv",
         headers={
-            "Content-disposition": "attachment; filename=production_data.csv",
+            "Content-disposition": "attachment; filename=production_data_export.csv",
             "Cache-Control": "no-cache"
         }
     )
@@ -207,12 +295,10 @@ def export_data():
 def handle_submit_output(data):
     """Handles production data submission from the worker interface."""
     try:
-        # This line expects 'entry_date' and 'entry_time' keys
+        # Create a single datetime object from the date and time strings
         data['datetime'] = datetime.strptime(f"{data['entry_date']} {data['entry_time']}", "%Y-%m-%d %H:%M") 
-        data['produced_qty'] = data['produced_qty']
-        data['produced_length'] = data['produced_length']
-        data['qty_produced_hours'] = data['qty_produced_hours']
         
+        # Log the submitted data, including all terminal and measured fields
         SUBMISSION_LOG.append(data)
         
         # Broadcast the updated log to the dashboard
@@ -238,8 +324,6 @@ def handle_join_machine_room(data):
         return
 
     # 1. Update machine tracking
-    # IMPORTANT: Use SID_TO_MACHINE.pop(request.sid) to handle re-joins if you wanted to be strict.
-    # For simplicity, we just update it.
     SID_TO_MACHINE[request.sid] = machine_name
     
     # 2. Join the SocketIO room
@@ -286,8 +370,7 @@ def handle_send_live_message(data):
         socketio.emit('message_sent_confirm', {'success': False, 'machineName': target_machine, 'reason': 'Missing target machine or message text.'}, room=request.sid)
         return
     
-    # Check if any client is connected to the target room
-    # Note: Flask-SocketIO doesn't easily expose this, but we can check our internal map
+    # Check if any client is connected to the target room by checking our internal map
     is_online = target_machine in SID_TO_MACHINE.values()
 
     if is_online:
@@ -316,7 +399,7 @@ def handle_connect():
         broadcast_online_status()
 
 # -------------------------------------
-# NEW Socket Event: Disconnect Handler (Crucial for online/offline tracking)
+# Socket Event: Disconnect Handler (Crucial for online/offline tracking)
 # -------------------------------------
 @socketio.on('disconnect')
 def handle_disconnect():
@@ -331,7 +414,7 @@ def handle_disconnect():
 # --- Start the Server ---
 if __name__ == '__main__':
     print("Starting Flask-SocketIO Server...")
-    print(f"Worker Input Page: http://10.10.2.230:5000/worker (e.g., set this to your worker tablet's home screen)")
-    print(f"Dashboard Page: http://10.10.2.230:5000/dashboard")
+    print(f"Worker Input Page: http://0.0.0.0:5000/worker")
+    print(f"Dashboard Page: http://0.0.0.0:5000/dashboard")
     # Use eventlet.wsgi.server for production/async mode
     eventlet.wsgi.server(eventlet.listen(('', 5000)), app)

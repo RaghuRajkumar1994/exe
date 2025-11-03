@@ -24,6 +24,8 @@
             border: none; padding: 20px; border-radius: 12px; 
             box-shadow: 0 4px 8px rgba(0,0,0,0.05); background-color: white; overflow-x: auto;
         }
+        /* Added max-width to table to ensure it fits in the card on smaller screens */
+        #log-table { max-width: 100%; } 
         th, td { white-space: nowrap; }
         #log-table th { background-color: #10B981; color: white; position: sticky; top: 0; }
         #totals-table th { background-color: #3B82F6; }
@@ -225,11 +227,23 @@
                             <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">Cable ID</th>
                             <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">Qty</th>
                             <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">Length</th>
-                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">QTY PRODUCED HOURS</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T1 Part No</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T1 Crimp H</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T1 Insul H</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T1 Crimp W</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T1 Insul W</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T1 Pull F (N)</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T2 Part No</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T2 Crimp H</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T2 Insul H</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T2 Crimp W</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T2 Insul W</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">T2 Pull F (N)</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white">PROD HOURS</th>
                         </tr>
                     </thead>
                     <tbody id="log-table-body" class="bg-white divide-y divide-gray-200">
-                        <tr><td colspan="9" class="px-4 py-4 text-sm text-gray-500">Select a date or submit new production data.</td></tr>
+                        <tr><td colspan="21" class="px-4 py-4 text-sm text-gray-500">Select a date or submit new production data.</td></tr> 
                     </tbody>
                 </table>
             </div>
@@ -350,7 +364,7 @@
         // --- Data Update Handler ---
         function updateDisplay(data) {
             // Update Log Table
-            let logHTML = data.log.length > 0 ? '' : '<tr><td colspan="9" class="px-4 py-4 text-sm text-gray-500 text-center">No production data found for this date.</td></tr>';
+            let logHTML = data.log.length > 0 ? '' : '<tr><td colspan="21" class="px-4 py-4 text-sm text-gray-500 text-center">No production data found for this date.</td></tr>';
             
             let totalQty = 0;
             let totalLength = 0;
@@ -367,6 +381,21 @@
                         <td class="px-4 py-2 text-sm text-gray-800">${entry.cable_id}</td>
                         <td class="px-4 py-2 text-sm text-green-700 font-bold">${entry.produced_qty}</td>
                         <td class="px-4 py-2 text-sm text-gray-800">${entry.produced_length}</td>
+                        
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t1_terminal_id || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t1_crimp_height || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t1_insulation_height || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t1_crimp_width || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t1_insulation_width || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t1_pull_force || ''}</td>
+
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t2_terminal_id || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t2_crimp_height || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t2_insulation_height || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t2_crimp_width || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t2_insulation_width || ''}</td>
+                        <td class="px-4 py-2 text-sm text-gray-800">${entry.t2_pull_force || ''}</td>
+
                         <td class="px-4 py-2 text-sm text-gray-800">${entry.qty_produced_hours}</td>
                     </tr>
                 `;
