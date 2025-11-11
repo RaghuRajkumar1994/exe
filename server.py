@@ -55,7 +55,7 @@ def get_data_for_date(date_str):
     filtered_log.sort(key=lambda x: x['datetime'], reverse=True) 
     return filtered_log
 
-# --- Broadcast Function (UPDATED) ---
+# --- Broadcast Function (UPDATED for ALL Terminal Fields) ---
 def broadcast_data(date_str=None):
     """
     Broadcasts the data for the requested date to the dashboard.
@@ -92,14 +92,16 @@ def broadcast_data(date_str=None):
             'produced_qty': entry.get('produced_qty', 0),
             'produced_length': entry.get('produced_length', 0.0),
             'qty_produced_hours': entry.get('qty_produced_hours', 0.0),
-            # --- NEW TERMINAL FIELDS ADDED FOR DASHBOARD ---
-            't1_terminal_id': entry.get('t1_terminal_id', 'N/A'),
+            # --- TERMINAL FIELDS ADDED FOR DASHBOARD ---
+            't1_terminal_id': entry.get('t1_terminal_id', ''), # <-- T1 Part No
+            't1_apl_no': entry.get('t1_apl_no', ''), 
             't1_crimp_height': t1_crimp_height,
             't1_insulation_height': t1_insulation_height,
             't1_crimp_width': t1_crimp_width,
             't1_insulation_width': t1_insulation_width,
             't1_pull_force': t1_pull_force,
-            't2_terminal_id': entry.get('t2_terminal_id', 'N/A'),
+            't2_terminal_id': entry.get('t2_terminal_id', ''), # <-- T2 Part No
+            't2_apl_no': entry.get('t2_apl_no', ''), 
             't2_crimp_height': t2_crimp_height,
             't2_insulation_height': t2_insulation_height,
             't2_crimp_width': t2_crimp_width,
@@ -195,7 +197,7 @@ def upload_plan():
         return f"Error processing file: {str(e)}", 500
 
 # -------------------------------------
-# EXPORT DATA FUNCTION (UPDATED)
+# EXPORT DATA FUNCTION (UPDATED for ALL Terminal Fields)
 # -------------------------------------
 @app.route('/export', methods=['GET'])
 def export_data():
@@ -232,14 +234,16 @@ def export_data():
             'Produced Qty': entry.get('produced_qty', 0), 
             'Produced Length': entry.get('produced_length', 0.0),
             'QTY PRODUCED HOURS': entry.get('qty_produced_hours', 0.0),
-            # --- NEW TERMINAL FIELDS ADDED FOR EXPORT (Using the merged value) ---
-            'T1 Part No': entry.get('t1_terminal_id', ''),
+            # --- TERMINAL FIELDS ADDED FOR EXPORT (Using the merged value) ---
+            'T1 Part No': entry.get('t1_terminal_id', ''), # <-- T1 Part No
+            'T1 APL NO': entry.get('t1_apl_no', ''), 
             'T1 Crimp H': t1_crimp_height,
             'T1 Insul H': t1_insulation_height,
             'T1 Crimp W': t1_crimp_width,
             'T1 Insul W': t1_insulation_width,
             'T1 Pull F (N)': t1_pull_force,
-            'T2 Part No': entry.get('t2_terminal_id', ''),
+            'T2 Part No': entry.get('t2_terminal_id', ''), # <-- T2 Part No
+            'T2 APL NO': entry.get('t2_apl_no', ''), 
             'T2 Crimp H': t2_crimp_height,
             'T2 Insul H': t2_insulation_height,
             'T2 Crimp W': t2_crimp_width,
@@ -268,8 +272,8 @@ def export_data():
         'Date', 'Time', 'Shift', 'Worker Name', 'Machine Name', 
         'FG Part Number', 'Cable Identification', 'Produced Qty', 
         'Produced Length', 'QTY PRODUCED HOURS',
-        'T1 Part No', 'T1 Crimp H', 'T1 Insul H', 'T1 Crimp W', 'T1 Insul W', 'T1 Pull F (N)',
-        'T2 Part No', 'T2 Crimp H', 'T2 Insul H', 'T2 Crimp W', 'T2 Insul W', 'T2 Pull F (N)'
+        'T1 Part No', 'T1 APL NO', 'T1 Crimp H', 'T1 Insul H', 'T1 Crimp W', 'T1 Insul W', 'T1 Pull F (N)', 
+        'T2 Part No', 'T2 APL NO', 'T2 Crimp H', 'T2 Insul H', 'T2 Crimp W', 'T2 Insul W', 'T2 Pull F (N)' 
     ]
     
     # Filter the final columns to only include those that actually exist 

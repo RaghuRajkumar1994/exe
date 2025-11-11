@@ -12,7 +12,7 @@
             padding: 20px; 
             background-color: #f4f7f9; 
             color: #333;
-            min-height: 100vh;
+            /* min-height: 100vh; -- REMOVED to allow page to scroll */
         }
         .main-container {
             max-width: 1600px; 
@@ -22,7 +22,6 @@
             align-items: center;
         }
         
-        /* --- CHANGE 1: ENLARGED AND CENTERED TITLE --- */
         h1 { 
             color: #1F2937; 
             text-align: center; 
@@ -42,15 +41,12 @@
             width: 100%;
         }
         
-        /* --- CHANGE 2: CENTERED ALL CARD TITLES (H2) --- */
         .card h2 {
             text-align: center;
         }
         
-        /* Reduced Vertical Spacing and Smaller Labels for Compactness */
         label { display: block; margin-top: 5px; font-weight: 600; color: #4B5563; font-size: 0.85rem; }
         
-        /* Reduced Input Padding */
         input:not(#produced-qty):not(#produced-length):not(#qty-produced-hours), select { 
             width: 100%; 
             padding: 7px; 
@@ -68,12 +64,22 @@
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25); 
         }
         
-        /* === NEW: Readonly Style === */
         input[readonly] {
-            background-color: #E5E7EB; /* Gray-200 to show it's disabled/autofilled */
+            background-color: #E5E7EB; 
             cursor: default;
-            color: #4B5563; /* Gray-600 */
+            color: #4B5563; 
         }
+
+        /* --- NEW VALIDATION STYLES --- */
+        .valid-manual-input {
+            border-color: #10B981 !important; 
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+        }
+        .invalid-manual-input {
+            border-color: #F59E0B !important; 
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+        }
+        /* --- END NEW VALIDATION STYLES --- */
 
         .btn-group { display: flex; gap: 10px; margin-top: 15px; }
         .btn-group button { 
@@ -93,11 +99,9 @@
         #reset-button:hover { background-color: #DC2626; box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);}
         .message { text-align: center; font-weight: bold; margin-top: 15px; padding: 8px; border-radius: 4px; font-size: 0.9rem; }
         
-        /* Default 2-column input row for general fields */
         .input-row { display: flex; gap: 10px; margin-bottom: 5px; }
         .input-row > div { flex: 1; } 
         
-        /* === Qty/Length/Hours Specific Style (Kept as 3-col) === */
         .input-row-qty { 
             margin-top: 15px; 
             margin-bottom: 10px; 
@@ -120,7 +124,6 @@
             font-weight: 700;
         }
         
-        /* === Plan Sheet Styles (Simplified and Compact) === */
         #plan-sheet-container { 
             border: 2px solid #3B82F6; 
             border-radius: 8px; 
@@ -129,16 +132,13 @@
             display: flex; 
             flex-direction: column; 
             overflow: hidden; 
-            flex-grow: 1; 
-            max-height: 100%;
+            /* flex-grow: 1; max-height: 100%; - REMOVED to allow content to dictate height */
         }
         #plan-data-view {
-            flex-grow: 1; 
-            overflow-y: auto; 
+            /* flex-grow: 1; overflow-y: auto; - REMOVED to allow content to grow without internal scrollbar */
             margin-top: 10px;
         }
 
-        /* === Plan Sheet Table and Button Styles (IMPROVED) === */
         #plan-sheet-table {
             width: 100%;
             border-collapse: collapse;
@@ -148,19 +148,19 @@
             padding: 8px 6px;
             text-align: left;
             border-bottom: 1px solid #E5E7EB;
-            white-space: nowrap; /* Prevent wrapping in cells */
+            white-space: nowrap; 
         }
         #plan-sheet-table th {
-            background-color: #DBEAFE; /* Blue-100 */
-            color: #1E40AF; /* Blue-800 */
+            background-color: #DBEAFE; 
+            color: #1E40AF; 
             font-weight: 700;
             position: sticky;
             top: 0;
             z-index: 10;
         }
         .plan-completed {
-            background-color: #ECFDF5; /* Green-50 */
-            color: #065F46; /* Green-800 */
+            background-color: #ECFDF5; 
+            color: #065F46; 
             opacity: 0.7;
         }
         .plan-completed td {
@@ -174,19 +174,19 @@
             transition: all 0.2s;
             font-size: 0.8rem;
             cursor: pointer;
-            min-width: 100px; /* Uniform width */
+            min-width: 100px; 
         }
 
         .complete-button-pending {
-            background-color: #3B82F6; /* Blue-600 */
+            background-color: #3B82F6; 
             color: white;
             box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
         }
         .complete-button-pending:hover {
-            background-color: #2563EB; /* Blue-700 */
+            background-color: #2563EB; 
         }
         .complete-button-completed {
-            background-color: #10B981; /* Green-500 */
+            background-color: #10B981; 
             color: white;
             opacity: 0.5;
             cursor: default;
@@ -197,12 +197,11 @@
             gap: 8px;
             font-size: 1.1rem;
             font-weight: 600;
-            color: #1D4ED8; /* Blue-700 */
+            color: #1D4ED8; 
             padding-bottom: 8px;
-            border-bottom: 2px solid #BFDBFE; /* Blue-200 */
+            border-bottom: 2px solid #BFDBFE; 
         }
         
-        /* === Terminal Box Styles (NEW) === */
         .terminal-box {
             border: 1px solid #D1D5DB; 
             border-radius: 8px;
@@ -211,13 +210,11 @@
             background-color: #F9FAFB;
         }
 
-        /* === Style for Title and Inline Terminal ID Input - CENTERED === */
         .title-and-id-row {
             display: flex;
             align-items: flex-end; 
             gap: 10px;
             width: fit-content; 
-            /* Adjusted margin to look good inside the new box */
             margin: 5px auto 10px auto; 
             border-bottom: 1px solid #E5E7EB; 
             padding-bottom: 5px;
@@ -235,26 +232,21 @@
             flex-grow: 0; 
             width: 180px; 
         }
-        /* Hide the label for the inline ID input */
         .title-and-id-row .terminal-id-input-group label {
             display: none; 
         }
-        /* Ensure the ID input itself looks right */
         .title-and-id-row .terminal-id-input-group input {
             margin-bottom: 0;
             padding: 5px 7px; 
         }
 
 
-        /* === Crimp Data specific styling - Full Width === */
-        /* Updated for 8 columns (4 parameters * 2 inputs) */
         .input-row-8col { 
             display: grid; 
             grid-template-columns: repeat(8, 1fr); 
             gap: 10px; 
             margin-bottom: 5px;
         }
-        /* New class for pull force row (2 inputs + 2 spacers) */
         .input-row-pull-force { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
@@ -265,7 +257,6 @@
             margin-bottom: 0;
         }
 
-        /* === CONNECTION STATUS STYLING === */
         #connection-card {
             padding: 10px 15px; 
         }
@@ -281,7 +272,6 @@
             text-align: center;
         }
         
-        /* === Main Layout Grid === */
         .main-content-grid {
             display: grid;
             grid-template-columns: 1fr; 
@@ -292,7 +282,7 @@
         @media (min-width: 1200px) { 
             .main-content-grid {
                 grid-template-columns: 1.5fr 1.5fr; 
-                max-height: calc(100vh - 40px); 
+                /* max-height: calc(100vh - 40px); - REMOVED to allow page to scroll */
             }
         }
         .data-entry-container {
@@ -309,14 +299,11 @@
             padding-top: 15px;
         }
         
-        /* ============================================== */
-        /* === FIX: NEW LIVE MESSAGE TOAST STYLES === */
-        /* ============================================== */
         #toast-container {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background-color: #3B82F6; /* Blue-600 */
+            background-color: #3B82F6; 
             color: white;
             padding: 15px;
             border-radius: 8px;
@@ -326,9 +313,8 @@
             opacity: 0;
             visibility: hidden;
             transform: translateX(100%);
-            /* Springy transition to make it look professional */
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            border-left: 5px solid #60A5FA; /* Blue-400 */
+            border-left: 5px solid #60A5FA; 
         }
         
         #toast-container.active {
@@ -370,21 +356,21 @@
                         </div>
                     </div>
                     <p id="room-status" class="text-xs mt-1 font-medium text-indigo-700">Not connected to a machine room.</p>
-                </div>
-
-                <div class="card bg-gray-100 border border-gray-300 p-4 mb-2">
-                    <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Load Measured Data Reference</p>
-                    <div class="input-row justify-center">
-                        <button id="excel-upload-button" onclick="openExcelFileSelector()" class="bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition duration-150 shadow-md p-2 flex items-center justify-center gap-2 w-full max-w-sm mx-auto">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-                            Load Check Sheet
-                        </button>
-                        <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
+                    
+                    <div class="p-4 mt-3 rounded-lg bg-yellow-50 border border-yellow-300" id="reference-data-card">
+                        <p class="text-sm font-semibold text-gray-700 mb-2 text-center">Load Reference Data</p>
+                        <div class="input-row justify-center">
+                            <button id="excel-upload-button" onclick="openExcelFileSelector()" class="bg-amber-500 text-white font-semibold rounded-lg hover:bg-amber-600 transition duration-150 shadow-md p-2 flex items-center justify-center gap-2 w-full max-w-sm mx-auto">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                                Load Reference Data
+                            </button>
+                            <input type="file" id="excel-file-input" accept=".xlsx, .xls" style="display: none;" onchange="handleExcelUpload(event)">
+                        </div>
                     </div>
-                </div>
+                    </div>
+
                 <div class="card submission-card">
                     <h2 class="text-lg font-semibold text-gray-700 mb-3">Submit Production Output</h2>
-
                     <div class="input-row">
                         <div>
                             <label for="entry-date">Date:</label>
@@ -415,11 +401,11 @@
                     <div class="input-row">
                         <div>
                             <label for="fg-part-no">FG Part No:</label>
-                            <input type="text" id="fg-part-no" placeholder="e.g., P-789" required oninput="autofillMeasuredData()">
+                            <input type="text" id="fg-part-no" list="fg-part-no-list" placeholder="e.g., P-789" required oninput="autofillMeasuredData()">
                         </div>
                         <div>
                             <label for="cable-id">Cable ID:</label>
-                            <input type="text" id="cable-id" placeholder="e.g., 12" required oninput="autofillMeasuredData()">
+                            <input type="text" id="cable-id" list="cable-id-list" placeholder="e.g., 12" required oninput="autofillMeasuredData()">
                         </div>
                     </div>
 
@@ -441,49 +427,49 @@
                         <div class="input-row-8col">
                             <div>
                                 <label for="t1-crimp-height-measured">Crimp H (mm) Meas:</label>
-                                <input type="number" step="0.01" id="t1-crimp-height-measured" placeholder="1.25" readonly tabindex="-1">
+                                <input type="number" step="0.01" id="t1-crimp-height-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t1-crimp-height-manual">Crimp H (mm) Man:</label>
-                                <input type="number" step="0.01" id="t1-crimp-height-manual" placeholder="1.25">
+                                <input type="number" step="0.01" id="t1-crimp-height-manual" placeholder="1.25" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
                                 <label for="t1-insulation-height-measured">Insulation H (mm) Meas:</label>
-                                <input type="number" step="0.01" id="t1-insulation-height-measured" placeholder="3.40" readonly tabindex="-1">
+                                <input type="number" step="0.01" id="t1-insulation-height-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t1-insulation-height-manual">Insulation H (mm) Man:</label>
-                                <input type="number" step="0.01" id="t1-insulation-height-manual" placeholder="3.40">
+                                <input type="number" step="0.01" id="t1-insulation-height-manual" placeholder="3.40" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
                                 <label for="t1-crimp-width-measured">Crimp W (mm) Meas:</label>
-                                <input type="number" step="0.01" id="t1-crimp-width-measured" placeholder="2.30" readonly tabindex="-1">
+                                <input type="number" step="0.01" id="t1-crimp-width-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t1-crimp-width-manual">Crimp W (mm) Man:</label>
-                                <input type="number" step="0.01" id="t1-crimp-width-manual" placeholder="2.30">
+                                <input type="number" step="0.01" id="t1-crimp-width-manual" placeholder="2.30" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
                                 <label for="t1-insulation-width-measured">Insulation W (mm) Meas:</label>
-                                <input type="number" step="0.01" id="t1-insulation-width-measured" placeholder="4.50" readonly tabindex="-1">
+                                <input type="number" step="0.01" id="t1-insulation-width-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t1-insulation-width-manual">Insulation W (mm) Man:</label>
-                                <input type="number" step="0.01" id="t1-insulation-width-manual" placeholder="4.50">
+                                <input type="number" step="0.01" id="t1-insulation-width-manual" placeholder="4.50" oninput="validateManualInput(event)">
                             </div>
                         </div>
                             
                         <div class="input-row-pull-force">
                             <div>
                                 <label for="t1-pull-force-measured">Pull Force (N) Meas:</label>
-                                <input type="number" step="0.1" id="t1-pull-force-measured" placeholder="120.5" readonly tabindex="-1">
+                                <input type="number" step="0.1" id="t1-pull-force-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t1-pull-force-manual">Pull Force (N) Man:</label>
-                                <input type="number" step="0.1" id="t1-pull-force-manual" placeholder="120.5">
+                                <input type="number" step="0.1" id="t1-pull-force-manual" placeholder="120.5" oninput="validateManualInput(event)">
                             </div>
                             <div></div> 
                             <div></div> 
@@ -505,49 +491,49 @@
                         <div class="input-row-8col">
                             <div>
                                 <label for="t2-crimp-height-measured">Crimp H (mm) Meas:</label>
-                                <input type="number" step="0.01" id="t2-crimp-height-measured" placeholder="1.25" readonly tabindex="-1">
+                                <input type="number" step="0.01" id="t2-crimp-height-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t2-crimp-height-manual">Crimp H (mm) Man:</label>
-                                <input type="number" step="0.01" id="t2-crimp-height-manual" placeholder="1.25">
+                                <input type="number" step="0.01" id="t2-crimp-height-manual" placeholder="1.25" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
                                 <label for="t2-insulation-height-measured">Insulation H (mm) Meas:</label>
-                                <input type="number" step="0.01" id="t2-insulation-height-measured" placeholder="3.40" readonly tabindex="-1">
+                                <input type="number" step="0.01" id="t2-insulation-height-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t2-insulation-height-manual">Insulation H (mm) Man:</label>
-                                <input type="number" step="0.01" id="t2-insulation-height-manual" placeholder="3.40">
+                                <input type="number" step="0.01" id="t2-insulation-height-manual" placeholder="3.40" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
                                 <label for="t2-crimp-width-measured">Crimp W (mm) Meas:</label>
-                                <input type="number" step="0.01" id="t2-crimp-width-measured" placeholder="2.30" readonly tabindex="-1">
+                                <input type="number" step="0.01" id="t2-crimp-width-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t2-crimp-width-manual">Crimp W (mm) Man:</label>
-                                <input type="number" step="0.01" id="t2-crimp-width-manual" placeholder="2.30">
+                                <input type="number" step="0.01" id="t2-crimp-width-manual" placeholder="2.30" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
                                 <label for="t2-insulation-width-measured">Insulation W (mm) Meas:</label>
-                                <input type="number" step="0.01" id="t2-insulation-width-measured" placeholder="4.50" readonly tabindex="-1">
+                                <input type="number" step="0.01" id="t2-insulation-width-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t2-insulation-width-manual">Insulation W (mm) Man:</label>
-                                <input type="number" step="0.01" id="t2-insulation-width-manual" placeholder="4.50">
+                                <input type="number" step="0.01" id="t2-insulation-width-manual" placeholder="4.50" oninput="validateManualInput(event)">
                             </div>
                         </div>
                             
                         <div class="input-row-pull-force">
                             <div>
                                 <label for="t2-pull-force-measured">Pull Force (N) Meas:</label>
-                                <input type="number" step="0.1" id="t2-pull-force-measured" placeholder="120.5" readonly tabindex="-1">
+                                <input type="number" step="0.1" id="t2-pull-force-measured" placeholder="" readonly tabindex="-1">
                             </div>
                             <div>
                                 <label for="t2-pull-force-manual">Pull Force (N) Man:</label>
-                                <input type="number" step="0.1" id="t2-pull-force-manual" placeholder="120.5">
+                                <input type="number" step="0.1" id="t2-pull-force-manual" placeholder="120.5" oninput="validateManualInput(event)">
                             </div>
                             <div></div> 
                             <div></div> 
@@ -560,7 +546,7 @@
                         </div>
                         <div>
                             <label for="produced-length">Length (M/F):</label>
-                            <input type="number" step="0.1" id="produced-length" required min="0.1">
+                            <input type="number" step="any" id="produced-length" required min="0.1" oninput="autofillMeasuredData()">
                         </div>
                         <div>
                             <label for="qty-produced-hours">Hours:</label>
@@ -574,6 +560,9 @@
                     </div>
 
                     <div id="message" class="message"></div>
+                    
+                    <datalist id="fg-part-no-list"></datalist>
+                    <datalist id="cable-id-list"></datalist>
                 </div>
             </div> 
             
@@ -617,6 +606,67 @@
         
         // GLOBAL LOOKUP TABLE for Excel Data
         let measuredDataLookup = [];
+
+        // --- NEW: EXCEL KEY MAPPING AND NORMALIZATION LOGIC (FIXED) ---
+        const EXCEL_HEADER_MAP = {
+            "fgpartno": "FG_PART_NO",
+            "cableid": "CABLE_ID",
+            "length": "LENGTH_SPEC", 
+            "lengthspec": "LENGTH_SPEC", 
+            
+            "t1terminalid": "T1_TERMINAL_ID",
+            "t1terminalpartnumber": "T1_TERMINAL_ID",
+            "t1aplno": "T1_APL_NO",
+            "t2terminalid": "T2_TERMINAL_ID",
+            "t2terminalpartnumber": "T2_TERMINAL_ID",
+            "t2aplno": "T2_APL_NO",
+
+            "t1crimph": "T1_CRIMP_H",
+            "t1crimphmm": "T1_CRIMP_H", 
+            "t1insulationh": "T1_INSULATION_H",
+            "t1insulationhmm": "T1_INSULATION_H", 
+            "t1crimpw": "T1_CRIMP_W",
+            "t1crimpwmm": "T1_CRIMP_W",
+            "t1insulationw": "T1_INSULATION_W",
+            "t1insulationwmm": "T1_INSULATION_W",
+            "t1pullforce": "T1_PULL_FORCE",
+            "t1pullforcen": "T1_PULL_FORCE", 
+
+            "t2crimph": "T2_CRIMP_H",
+            "t2crimphmm": "T2_CRIMP_H", 
+            "t2insulationh": "T2_INSULATION_H",
+            "t2insulationhmm": "T2_INSULATION_H",
+            "t2crimpw": "T2_CRIMP_W",
+            "t2crimpwmm": "T2_CRIMP_W",
+            "t2insulationw": "T2_INSULATION_W",
+            "t2insulationwmm": "T2_INSULATION_W",
+            "t2pullforce": "T2_PULL_FORCE",
+            "t2pullforcen": "T2_PULL_FORCE",
+        };
+
+        /** Normalizes an Excel header string by removing non-alphanumeric chars (excluding spaces, but spaces are removed later) and converting to lowercase. */
+        function normalizeHeader(header) {
+            // Removes spaces, parentheses, and all non-alphanumeric characters, then lowercases.
+            return String(header).replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+        }
+
+        /** Remaps keys in an Excel row object from potentially inconsistent header names to standard internal names. */
+        function normalizeExcelRow(rawRow) {
+            const standardizedRow = {};
+            for (const key in rawRow) {
+                if (Object.hasOwnProperty.call(rawRow, key)) {
+                    const normalizedKey = normalizeHeader(key);
+                    const standardKey = EXCEL_HEADER_MAP[normalizedKey];
+                    
+                    // Map to the standard key if found
+                    if (standardKey) {
+                        standardizedRow[standardKey] = rawRow[key];
+                    }
+                }
+            }
+            return standardizedRow;
+        }
+        // --- END NEW LOGIC ---
 
         function setInitialDateTime() {
             const now = new Date();
@@ -670,6 +720,18 @@
             document.getElementById('t1-insulation-width-manual').value = '';
             document.getElementById('t1-pull-force-measured').value = '';
             document.getElementById('t1-pull-force-manual').value = '';
+            // Clear validation styles
+            document.getElementById('t1-crimp-height-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t1-insulation-height-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t1-crimp-width-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t1-insulation-width-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t1-pull-force-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t1-crimp-height-measured').removeAttribute('data-tolerance');
+            document.getElementById('t1-insulation-height-measured').removeAttribute('data-tolerance');
+            document.getElementById('t1-crimp-width-measured').removeAttribute('data-tolerance');
+            document.getElementById('t1-insulation-width-measured').removeAttribute('data-tolerance');
+            document.getElementById('t1-pull-force-measured').removeAttribute('data-tolerance');
+
 
             // Reset Terminal 2 Fields (12 fields total)
             document.getElementById('t2-terminal-id').value = ''; 
@@ -684,6 +746,18 @@
             document.getElementById('t2-insulation-width-manual').value = '';
             document.getElementById('t2-pull-force-measured').value = '';
             document.getElementById('t2-pull-force-manual').value = '';
+            // Clear validation styles
+            document.getElementById('t2-crimp-height-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t2-insulation-height-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t2-crimp-width-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t2-insulation-width-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t2-pull-force-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
+            document.getElementById('t2-crimp-height-measured').removeAttribute('data-tolerance');
+            document.getElementById('t2-insulation-height-measured').removeAttribute('data-tolerance');
+            document.getElementById('t2-crimp-width-measured').removeAttribute('data-tolerance');
+            document.getElementById('t2-insulation-width-measured').removeAttribute('data-tolerance');
+            document.getElementById('t2-pull-force-measured').removeAttribute('data-tolerance');
+
 
             document.getElementById('message').textContent = '';
             setInitialDateTime(); // Reset date/time to current
@@ -695,7 +769,7 @@
         
         // --- UPDATED Autofill Function ---
         function clearMeasuredFields() {
-            const fieldsToClear = [
+            const measuredFields = [
                 // T1
                 't1-terminal-id', 't1-apl-no',
                 't1-crimp-height-measured', 't1-insulation-height-measured', 't1-crimp-width-measured', 
@@ -705,72 +779,252 @@
                 't2-crimp-height-measured', 't2-insulation-height-measured', 't2-crimp-width-measured', 
                 't2-insulation-width-measured', 't2-pull-force-measured'
             ];
-            fieldsToClear.forEach(id => {
-                document.getElementById(id).value = '';
+            
+            const manualFields = [
+                't1-crimp-height-manual', 't1-insulation-height-manual', 't1-crimp-width-manual', 
+                't1-insulation-width-manual', 't1-pull-force-manual', 
+                't2-crimp-height-manual', 't2-insulation-height-manual', 't2-crimp-width-manual', 
+                't2-insulation-width-manual', 't2-pull-force-manual'
+            ];
+
+            measuredFields.forEach(id => {
+                const input = document.getElementById(id);
+                input.value = '';
+                input.removeAttribute('data-tolerance');
+            });
+            manualFields.forEach(id => {
+                 document.getElementById(id).classList.remove('valid-manual-input', 'invalid-manual-input');
             });
         }
         
         function autofillMeasuredData() {
             const fgPartNoInput = document.getElementById('fg-part-no').value.trim();
             const cableIdInput = document.getElementById('cable-id').value.trim();
+            const producedLengthInput = parseFloat(document.getElementById('produced-length').value.trim()); 
             
-            clearMeasuredFields(); // Always clear first
+            clearMeasuredFields(); 
             
-            if (!fgPartNoInput || !cableIdInput || measuredDataLookup.length === 0) {
-                // Do not show an error if fields are just empty or data not loaded
+            if (!fgPartNoInput || !cableIdInput || isNaN(producedLengthInput) || producedLengthInput <= 0 || measuredDataLookup.length === 0) {
                 return;
             }
             
-            // Search the loaded data
             const match = measuredDataLookup.find(row => 
                 row.FG_PART_NO === fgPartNoInput && 
-                row.CABLE_ID === cableIdInput
+                row.CABLE_ID === cableIdInput &&
+                row.BASE_LENGTH !== undefined && 
+                producedLengthInput >= (row.BASE_LENGTH - row.TOLERANCE) &&
+                producedLengthInput <= (row.BASE_LENGTH + row.TOLERANCE)
             );
+
+            // Helper to set measured value and tolerance attribute
+            const setMeasuredData = (idPrefix, specKey) => {
+                const baseKey = `${specKey}_BASE`;
+                const toleranceKey = `${specKey}_TOLERANCE`;
+                
+                const measuredInputId = `${idPrefix}-measured`;
+                const measuredInput = document.getElementById(measuredInputId);
+                
+                const baseValue = match[baseKey];
+                const toleranceValue = match[toleranceKey];
+                
+                if (baseValue !== '' && baseValue !== undefined && !isNaN(baseValue)) {
+                    measuredInput.value = baseValue;
+                    measuredInput.setAttribute('data-tolerance', toleranceValue);
+                } else {
+                    measuredInput.value = '';
+                    measuredInput.removeAttribute('data-tolerance');
+                }
+                
+                // Manually trigger the validation check if a manual value exists
+                const manualInputId = `${idPrefix}-manual`;
+                const manualInput = document.getElementById(manualInputId);
+                if(manualInput && manualInput.value.trim() !== '') {
+                    validateManualInput({ target: manualInput });
+                } else if (manualInput) {
+                    // Clear styles if no manual value is present
+                    manualInput.classList.remove('valid-manual-input', 'invalid-manual-input');
+                }
+            };
             
             if (match) {
-                // Terminal 1 Data
+                // Terminal 1 Data - Non-Spec Fields
                 document.getElementById('t1-terminal-id').value = match.T1_TERMINAL_ID || ''; 
                 document.getElementById('t1-apl-no').value = match.T1_APL_NO || ''; 
-                document.getElementById('t1-crimp-height-measured').value = match.T1_CRIMP_H || '';
-                document.getElementById('t1-insulation-height-measured').value = match.T1_INSULATION_H || '';
-                document.getElementById('t1-crimp-width-measured').value = match.T1_CRIMP_W || '';
-                document.getElementById('t1-insulation-width-measured').value = match.T1_INSULATION_W || '';
-                document.getElementById('t1-pull-force-measured').value = match.T1_PULL_FORCE || '';
+                // Terminal 1 Data - Spec Fields
+                setMeasuredData('t1-crimp-height', 'T1_CRIMP_H');
+                setMeasuredData('t1-insulation-height', 'T1_INSULATION_H');
+                setMeasuredData('t1-crimp-width', 'T1_CRIMP_W');
+                setMeasuredData('t1-insulation-width', 'T1_INSULATION_W');
+                setMeasuredData('t1-pull-force', 'T1_PULL_FORCE');
                 
-                // Terminal 2 Data
+                // Terminal 2 Data - Non-Spec Fields
                 document.getElementById('t2-terminal-id').value = match.T2_TERMINAL_ID || ''; 
                 document.getElementById('t2-apl-no').value = match.T2_APL_NO || ''; 
-                document.getElementById('t2-crimp-height-measured').value = match.T2_CRIMP_H || '';
-                document.getElementById('t2-insulation-height-measured').value = match.T2_INSULATION_H || '';
-                document.getElementById('t2-crimp-width-measured').value = match.T2_CRIMP_W || '';
-                document.getElementById('t2-insulation-width-measured').value = match.T2_INSULATION_W || '';
-                document.getElementById('t2-pull-force-measured').value = match.T2_PULL_FORCE || '';
+                // Terminal 2 Data - Spec Fields
+                setMeasuredData('t2-crimp-height', 'T2_CRIMP_H');
+                setMeasuredData('t2-insulation-height', 'T2_INSULATION_H');
+                setMeasuredData('t2-crimp-width', 'T2_CRIMP_W');
+                setMeasuredData('t2-insulation-width', 'T2_INSULATION_W');
+                setMeasuredData('t2-pull-force', 'T2_PULL_FORCE');
 
-                showMessageBox(`Full reference data for ${fgPartNoInput} / ${cableIdInput} autofilled from check sheet.`, 'success');
+                showMessageBox(`Full reference data for ${fgPartNoInput} / ${cableIdInput} / ${producedLengthInput} (within tolerance) autofilled from check sheet.`, 'success');
             } else {
                 
-                // --- NEW DETAILED ERROR CHECKING ---
-                let debugMessage = `No matching reference data found for ${fgPartNoInput} / ${cableIdInput}. `;
+                let debugMessage = `No matching reference data found for ${fgPartNoInput} / ${cableIdInput} / ${producedLengthInput}. `;
                 
-                // Check if FG_PART_NO exists at all
                 const fgMatches = measuredDataLookup.filter(row => row.FG_PART_NO === fgPartNoInput);
+                
                 if (fgMatches.length > 0) {
-                    debugMessage += `Found ${fgMatches.length} rows with matching FG Part No (${fgPartNoInput}). `;
+                    debugMessage += `Found ${fgMatches.length} rows with matching FG Part No. `;
                     
-                    // Check if CABLE_ID matches in any of those rows
-                    const cableIdsFound = fgMatches.map(row => `"${row.CABLE_ID}"`);
-                    debugMessage += `However, CABLE_ID "${cableIdInput}" did not match any of these Cable IDs: ${cableIdsFound.join(', ')}.`;
-                    debugMessage += ` (Check for hidden spaces or character mismatches in your Excel 'CABLE_ID' column, even if they look right.)`;
+                    const cableMatches = fgMatches.filter(row => row.CABLE_ID === cableIdInput);
+                    
+                    if (cableMatches.length > 0) {
+                        debugMessage += `Found ${cableMatches.length} rows also matching Cable ID. Length must be out of tolerance.`;
+                        if (cableMatches[0].BASE_LENGTH !== undefined) {
+                            debugMessage += ` (Check that ${producedLengthInput} is between ${cableMatches[0].BASE_LENGTH - cableMatches[0].TOLERANCE} and ${cableMatches[0].BASE_LENGTH + cableMatches[0].TOLERANCE})`;
+                        }
+                    } else {
+                         debugMessage += `Cable ID "${cableIdInput}" was not found in combination with the FG Part No.`;
+                    }
+                    
                 } else {
-                    // FG_PART_NO itself is the problem
-                    debugMessage += `FG Part No "${fgPartNoInput}" was not found in the loaded sheet. (Check for hidden spaces or character mismatches in your Excel 'FG_PART_NO' column).`;
+                    debugMessage += `FG Part No "${fgPartNoInput}" was not found in the loaded sheet.`;
                 }
 
                 showMessageBox(debugMessage, 'warning');
             }
         }
         
-        // --- FIXED: Excel Upload Functions (More robust string conversion) ---
+        // --- NEW/UPDATED: Function to extract base numeric value and tolerance from specification string ---
+        /** * Attempts to extract a base numeric value and tolerance from a string that might contain specifications, 
+         * tolerances, and units (e.g., "2.10±0.1 (SC)", "120 N").
+         * Applies default tolerance if none is explicitly found.
+         */
+        function parseSpecification(value, fieldType) {
+            const DEFAULT_TOLERANCE_DIMENSIONAL = 0.1;
+            const DEFAULT_TOLERANCE_PULL_FORCE = 10.0;
+            
+            let base = '';
+            let tolerance = '';
+            
+            // If the value is already a number (raw data from Excel), use it as base and apply default tolerance
+            if (typeof value === 'number') {
+                base = value; 
+                tolerance = (fieldType === 'PULL_FORCE') ? DEFAULT_TOLERANCE_PULL_FORCE : DEFAULT_TOLERANCE_DIMENSIONAL;
+                return { base, tolerance };
+            }
+            if (typeof value !== 'string') {
+                return { base: '', tolerance: '' };
+            }
+            
+            let str = value.trim().toUpperCase();
+
+            // 1. Handle Pull Force (N) - Remove 'N' if present
+            if (str.endsWith('N')) {
+                str = str.replace('N', '').trim();
+            }
+            
+            // 2. Look for explicit base ± tolerance pattern: e.g., "2.10±0.1", "0.95 +/ 0.05", "1.25(±0.1)"
+            const explicitMatch = str.match(/^(\d+(?:\.\d+)?)(?:[\s(]*[+-±]\s*(\d+(?:\.\d+)?))?/);
+            if (explicitMatch) {
+                base = parseFloat(explicitMatch[1]);
+                
+                // If tolerance is found in the match group 2
+                if (explicitMatch[2]) {
+                    tolerance = parseFloat(explicitMatch[2]);
+                }
+            } 
+            
+            // 3. Apply default tolerance if base is found but tolerance isn't explicit
+            if (base !== '' && !isNaN(base)) {
+                if (tolerance === '') {
+                    tolerance = (fieldType === 'PULL_FORCE') 
+                        ? DEFAULT_TOLERANCE_PULL_FORCE 
+                        : DEFAULT_TOLERANCE_DIMENSIONAL;
+                }
+            } else {
+                // If no number could be parsed at all
+                base = '';
+                tolerance = '';
+            }
+            
+            return { base, tolerance };
+        }
+        // --- END NEW FUNCTION ---
+
+        /** NEW FUNCTION: Performs live validation on a manual input field against its corresponding measured value and tolerance. */
+        function validateManualInput(event) {
+            const manualInput = event.target;
+            const manualId = manualInput.id;
+            
+            // Derive the ID for the corresponding measured field. 
+            // e.g., 't1-crimp-height-manual' -> 't1-crimp-height-measured'
+            const measuredId = manualId.replace('-manual', '-measured');
+            const measuredInput = document.getElementById(measuredId);
+            
+            // Clear previous validation styles
+            manualInput.classList.remove('valid-manual-input', 'invalid-manual-input');
+            
+            if (!measuredInput) {
+                return; // No corresponding measured field
+            }
+
+            const manualValue = parseFloat(manualInput.value);
+            const measuredValue = parseFloat(measuredInput.value);
+            const tolerance = parseFloat(measuredInput.getAttribute('data-tolerance'));
+            
+            // Only validate if all required numeric data is present and the user has entered a value
+            if (isNaN(manualValue) || isNaN(measuredValue) || isNaN(tolerance) || manualInput.value.trim() === '') {
+                return; 
+            }
+
+            const difference = Math.abs(manualValue - measuredValue);
+            
+            if (difference <= tolerance) {
+                manualInput.classList.add('valid-manual-input');
+            } else {
+                manualInput.classList.add('invalid-manual-input');
+            }
+        }
+        
+        /** NEW FUNCTION: Populates the datalists for FG Part No and Cable ID from the loaded lookup data. */
+        function populateDatalists(lookupData) {
+            const fgList = document.getElementById('fg-part-no-list');
+            const cableList = document.getElementById('cable-id-list');
+            
+            // Clear existing options
+            fgList.innerHTML = '';
+            cableList.innerHTML = '';
+
+            if (lookupData.length === 0) {
+                return;
+            }
+
+            // Get unique FG Part Nos
+            const uniqueFgPartNos = [...new Set(lookupData
+                .map(row => row.FG_PART_NO)
+                .filter(value => value))]; // Filter out empty/null/undefined
+            
+            uniqueFgPartNos.forEach(fg => {
+                const option = document.createElement('option');
+                option.value = fg;
+                fgList.appendChild(option);
+            });
+
+            // Get unique Cable IDs
+            const uniqueCableIds = [...new Set(lookupData
+                .map(row => row.CABLE_ID)
+                .filter(value => value))]; // Filter out empty/null/undefined
+            
+            uniqueCableIds.forEach(cable => {
+                const option = document.createElement('option');
+                option.value = cable;
+                cableList.appendChild(option);
+            });
+        }
+        
+        // --- FIXED: Excel Upload Functions (Using the new parser) ---
         function openExcelFileSelector() {
             document.getElementById('excel-file-input').click();
         }
@@ -781,54 +1035,104 @@
                 return;
             }
 
+            const refDataCard = document.getElementById('reference-data-card');
+            refDataCard.className = refDataCard.className.replace(/bg-\w+-\d+ border-?\w*-\d+/g, '').trim(); 
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    // Use header: 1 to enforce reading the first row as headers. raw: true retains original cell values/types.
                     const workbook = XLSX.read(data, { type: 'array', cellStyles: true, raw: true }); 
                     const sheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[sheetName];
 
-                    // Convert the sheet data to JSON array
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    const rawJsonData = XLSX.utils.sheet_to_json(worksheet);
 
-                    if (jsonData.length === 0) {
+                    if (rawJsonData.length === 0) {
                         throw new Error('No data rows found. Ensure data starts on row 2 with headers on row 1.');
                     }
                     
-                    // --- FIX IS HERE: Explicitly convert and store key fields as trimmed strings ---
-                    measuredDataLookup = jsonData.map(row => {
-                        const newRow = { ...row };
+                    // --- MODIFIED: Key Normalization and Parsing (Including Base/Tolerance) ---
+                    measuredDataLookup = rawJsonData.map(rawRow => {
+                        const standardizedRow = normalizeExcelRow(rawRow); 
+                        const newRow = {};
                         
-                        // Ensure FG_PART_NO is a trimmed string
-                        newRow.FG_PART_NO = String(newRow.FG_PART_NO || '').trim();
+                        // 1. Copy non-spec fields
+                        newRow.FG_PART_NO = String(standardizedRow.FG_PART_NO || '').trim();
+                        newRow.CABLE_ID = String(standardizedRow.CABLE_ID || '').trim();
+                        newRow.T1_TERMINAL_ID = standardizedRow.T1_TERMINAL_ID || '';
+                        newRow.T1_APL_NO = standardizedRow.T1_APL_NO || '';
+                        newRow.T2_TERMINAL_ID = standardizedRow.T2_TERMINAL_ID || '';
+                        newRow.T2_APL_NO = standardizedRow.T2_APL_NO || '';
                         
-                        // Ensure CABLE_ID is a trimmed string (crucial for matching '12' as a number in Excel to '12' as text in the form)
-                        // This handles both numbers (12 -> "12") and text ("12") correctly.
-                        newRow.CABLE_ID = String(newRow.CABLE_ID || '').trim();
+                        // Helper to parse and assign base/tolerance for a spec field
+                        const parseAndAssign = (standardKey, type) => {
+                            const spec = standardizedRow[standardKey];
+                            const { base, tolerance } = parseSpecification(spec, type);
+                            newRow[`${standardKey}_BASE`] = base;
+                            newRow[`${standardKey}_TOLERANCE`] = tolerance;
+                        };
+                        
+                        // 2. Parse and Extract base numeric values for Crimp/Pull Force fields (Dimensional)
+                        parseAndAssign('T1_CRIMP_H', 'DIMENSIONAL');
+                        parseAndAssign('T1_INSULATION_H', 'DIMENSIONAL');
+                        parseAndAssign('T1_CRIMP_W', 'DIMENSIONAL');
+                        parseAndAssign('T1_INSULATION_W', 'DIMENSIONAL');
+                        parseAndAssign('T1_PULL_FORCE', 'PULL_FORCE');
+                        
+                        parseAndAssign('T2_CRIMP_H', 'DIMENSIONAL');
+                        parseAndAssign('T2_INSULATION_H', 'DIMENSIONAL');
+                        parseAndAssign('T2_CRIMP_W', 'DIMENSIONAL');
+                        parseAndAssign('T2_INSULATION_W', 'DIMENSIONAL');
+                        parseAndAssign('T2_PULL_FORCE', 'PULL_FORCE');
+                        
+                        // 3. Parse LENGTH SPEC
+                        const lengthRaw = String(standardizedRow.LENGTH_SPEC || '').trim();
+                        const lengthMatch = lengthRaw.match(/(\d+(?:\.\d+)?)\s*[+-±]\s*(\d+(?:\.\d+)?)/); 
+
+                        if (lengthMatch) {
+                            newRow.BASE_LENGTH = parseFloat(lengthMatch[1]); 
+                            newRow.TOLERANCE = parseFloat(lengthMatch[2]);   
+                        } else {
+                            // If no tolerance is specified for length, assume fixed length with tolerance 0.
+                            const fixedLength = parseFloat(lengthRaw);
+                            if (!isNaN(fixedLength)) {
+                                newRow.BASE_LENGTH = fixedLength;
+                                newRow.TOLERANCE = 0; 
+                            } else {
+                                newRow.BASE_LENGTH = undefined;
+                                newRow.TOLERANCE = undefined;
+                            }
+                        }
                         
                         return newRow;
-                    });
-                    // --- END FIX ---
+                    }).filter(row => row.FG_PART_NO && row.CABLE_ID && row.BASE_LENGTH !== undefined); 
+                    // --- END MODIFIED ---
 
-
-                    showMessageBox(`Successfully loaded ${measuredDataLookup.length} records from Check Sheet. Try entering an FG Part No and Cable ID.`, 'success');
+                    refDataCard.className += ' bg-emerald-50 border border-emerald-400';
+                    
+                    // NEW: Populate the datalists with unique values
+                    populateDatalists(measuredDataLookup);
+                    
+                    showMessageBox(`Successfully loaded and parsed ${measuredDataLookup.length} valid records from Check Sheet. Specification values were converted to base numbers.`, 'success');
 
                 } catch (error) {
+                    refDataCard.className += ' bg-red-50 border border-red-400';
+
                     showMessageBox(`Error processing file: ${error.message}`, 'error');
-                    measuredDataLookup = []; // Clear data on error
+                    measuredDataLookup = []; 
+                    populateDatalists([]); // Clear lists on error
                 } finally {
-                    // Reset the file input so the same file can be selected again
                     event.target.value = '';
-                    setTimeout(() => { document.getElementById('message').textContent = ''; }, 8000);
                 }
             };
 
             reader.onerror = function() {
+                refDataCard.className += ' bg-red-50 border border-red-400';
+
                 showMessageBox('Error reading the file.', 'error');
                 measuredDataLookup = [];
-                setTimeout(() => { document.getElementById('message').textContent = ''; }, 5000);
+                populateDatalists([]); // Clear lists on error
             };
 
             reader.readAsArrayBuffer(file);
@@ -843,23 +1147,20 @@
                 return;
             }
             
-            // 1. Gather all data
             const data = {
                 shift: document.getElementById('shift').value,
                 operator_name: document.getElementById('operator-name').value, 
                 machine_name: machineName,
                 fg_part_no: document.getElementById('fg-part-no').value,
                 cable_id: document.getElementById('cable-id').value,
-                // These are required fields, validation is below
                 produced_qty: parseInt(document.getElementById('produced-qty').value),
                 produced_length: parseFloat(document.getElementById('produced-length').value),
                 qty_produced_hours: parseFloat(document.getElementById('qty-produced-hours').value),
                 entry_date: document.getElementById('entry-date').value, 
                 entry_time: document.getElementById('entry-time').value,
                 
-                // Terminal 1 Data
                 t1_terminal_id: document.getElementById('t1-terminal-id').value,
-                t1_apl_no: document.getElementById('t1-apl-no').value, 
+                t1_apl_no: document.getElementById('t1-apl-no').value,
                 t1_crimp_height_measured: parseFloat(document.getElementById('t1-crimp-height-measured').value),
                 t1_crimp_height_manual: parseFloat(document.getElementById('t1-crimp-height-manual').value),
                 t1_insulation_height_measured: parseFloat(document.getElementById('t1-insulation-height-measured').value),
@@ -871,7 +1172,6 @@
                 t1_pull_force_measured: parseFloat(document.getElementById('t1-pull-force-measured').value),
                 t1_pull_force_manual: parseFloat(document.getElementById('t1-pull-force-manual').value),
                 
-                // Terminal 2 Data
                 t2_terminal_id: document.getElementById('t2-terminal-id').value,
                 t2_apl_no: document.getElementById('t2-apl-no').value,
                 t2_crimp_height_measured: parseFloat(document.getElementById('t2-crimp-height-measured').value),
@@ -886,7 +1186,6 @@
                 t2_pull_force_manual: parseFloat(document.getElementById('t2-pull-force-manual').value)
             };
             
-            // 2. Simple validation (client-side checks for required fields only)
             if (!document.querySelector('#entry-date').checkValidity() || !document.querySelector('#entry-time').checkValidity() || !document.querySelector('#shift').checkValidity() || !document.querySelector('#operator-name').checkValidity() || !document.querySelector('#fg-part-no').checkValidity() || !document.querySelector('#cable-id').checkValidity()) {
                 showMessageBox('Please fill in all general required fields.', 'error');
                 return;
@@ -909,41 +1208,41 @@
                  return;
             }
             
-            // Show submission message
             document.getElementById('message').textContent = 'Submitting data...';
             document.getElementById('message').style.backgroundColor = '#EFF6FF';
             document.getElementById('message').style.color = '#1E40AF';
 
             socket.emit('submit_output', data);
 
-            // Clear submitted data fields for a new entry
             document.getElementById('fg-part-no').value = ''; 
             document.getElementById('cable-id').value = ''; 
             document.getElementById('produced-qty').value = '';
             document.getElementById('produced-length').value = '';
             document.getElementById('qty-produced-hours').value = '';
             
-            // Clear all Terminal 1 & 2 fields (Measured and Manual)
             clearMeasuredFields(); 
-            // Only need to clear Manual fields as clearMeasuredFields now handles Measured/Reference ones
+            document.getElementById('t1-terminal-id').value = ''; 
+            document.getElementById('t1-apl-no').value = ''; 
             document.getElementById('t1-crimp-height-manual').value = '';
             document.getElementById('t1-insulation-height-manual').value = '';
             document.getElementById('t1-crimp-width-manual').value = '';
             document.getElementById('t1-insulation-width-manual').value = '';
             document.getElementById('t1-pull-force-manual').value = '';
 
+            document.getElementById('t2-terminal-id').value = ''; 
+            document.getElementById('t2-apl-no').value = '';
             document.getElementById('t2-crimp-height-manual').value = '';
             document.getElementById('t2-insulation-height-manual').value = '';
-            document.getElementById('t2-crimp-width-manual').value = '';
             document.getElementById('t2-crimp-width-manual').value = '';
             document.getElementById('t2-insulation-width-manual').value = '';
             document.getElementById('t2-pull-force-manual').value = '';
             
+            // Clear validation styles and data-tolerance attributes from all inputs
+            resetForm(); 
+
             document.getElementById('message').textContent = 'Output submitted successfully! Ready for next entry.';
             setTimeout(() => { document.getElementById('message').textContent = ''; }, 3000); 
         }
-
-        // --- Socket.IO Event Handlers ---
 
         socket.on('join_confirm', (data) => {
             if (data.success) {
@@ -972,12 +1271,10 @@
              }, 3000);
         });
         
-        // --- LIVE MESSAGE LISTENER ---
         socket.on('live_message', (data) => {
             showMessageBox(data.message, 'info');
         });
 
-        // --- Plan Sheet Rendering ---
         function displayPlanSheet(plan, machineName) {
             currentPlanMachine.textContent = machineName;
             
@@ -991,16 +1288,13 @@
             const headers = Object.keys(plan[0]);
             const displayHeaders = headers.filter(h => h !== 'line_id');
 
-            // Build Header Row
             displayHeaders.forEach(header => {
-                // Shorten header text for display
                 const shortHeader = header.toUpperCase().replace(/_/g, ' ').replace('IDENTIFICATION', 'ID').replace('NUMBER', 'NO');
                 tableHTML += `<th>${shortHeader}</th>`;
             });
             tableHTML += '<th>ACTION</th>'; 
             tableHTML += '</tr></thead><tbody>';
 
-            // Build Data Rows
             plan.forEach(row => {
                 const isCompleted = row.status === 'completed';
                 const rowClass = isCompleted ? 'plan-completed' : '';
@@ -1016,7 +1310,6 @@
                     }
                 });
                 
-                // Action Button Column
                 const buttonText = isCompleted ? 'Completed' : 'Mark Done';
                 const buttonClass = isCompleted ? 'complete-button-completed' : 'complete-button-pending';
                 const buttonAction = isCompleted ? '' : `onclick="markPlanLineComplete('${row.line_id}')"`;
@@ -1029,7 +1322,6 @@
             planDataView.innerHTML = tableHTML;
         }
         
-        // --- LIVE MESSAGE TOAST FUNCTIONS ---
         let messageTimeout;
         
         function showMessageBox(message, type = 'info') {
