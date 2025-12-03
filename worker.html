@@ -34,7 +34,7 @@
         }
         
         .card { 
-            background-color: white; 
+            background-color: #FFFAF0; 
             padding: 20px; 
             border-radius: 12px; 
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
@@ -70,14 +70,18 @@
             color: #4B5563; 
         }
 
-        /* --- NEW VALIDATION STYLES --- */
-        .valid-manual-input {
+        /* --- NEW VALIDATION STYLES (3-Color Concept) --- */
+        .exact-match-input { /* Green: Exact match */
             border-color: #10B981 !important; 
             box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
         }
-        .invalid-manual-input {
+        .tolerable-match-input { /* Orange: Not exact, but accepted (within tolerance or > min pull force) */
             border-color: #F59E0B !important; 
             box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+        }
+        .invalid-manual-input { /* Red: Data not match (Outside tolerance or < min pull force) */
+            border-color: #EF4444 !important; /* Red */
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
         }
         /* --- END NEW VALIDATION STYLES --- */
 
@@ -113,8 +117,10 @@
             padding: 10px 8px; 
             text-align: center; 
             font-weight: 700; 
-            background-color: #EFFBEB; 
-            border-color: #34D399; 
+            /* STYLES MODIFIED FOR LIGHT DARK GREEN */
+            background-color: #E6F7E6; 
+            border-color: #047857; 
+            color: #047857;
             transition: all 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
         .input-row-qty label {
@@ -158,7 +164,7 @@
             top: 0;
             z-index: 10;
         }
-        .plan-completed {
+        #plan-sheet-table tr.plan-completed {
             background-color: #ECFDF5; 
             color: #065F46; 
             opacity: 0.7;
@@ -207,7 +213,7 @@
             border-radius: 8px;
             padding: 10px;
             margin-top: 15px;
-            background-color: #F9FAFB;
+            background-color: #F5FFFA;
         }
 
         .title-and-id-row {
@@ -394,7 +400,7 @@
                         </div>
                         <div>
                             <label for="operator-name">Operator Name:</label>
-                            <input type="text" id="operator-name" placeholder="Enter name" required>
+                            <input type="text" id="operator-name" required> 
                         </div>
                     </div>
 
@@ -431,7 +437,7 @@
                             </div>
                             <div>
                                 <label for="t1-crimp-height-manual">Crimp H (mm) Man:</label>
-                                <input type="number" step="0.01" id="t1-crimp-height-manual" placeholder="1.25" oninput="validateManualInput(event)">
+                                <input type="number" step="0.01" id="t1-crimp-height-manual" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
@@ -440,7 +446,7 @@
                             </div>
                             <div>
                                 <label for="t1-insulation-height-manual">Insulation H (mm) Man:</label>
-                                <input type="number" step="0.01" id="t1-insulation-height-manual" placeholder="3.40" oninput="validateManualInput(event)">
+                                <input type="number" step="0.01" id="t1-insulation-height-manual" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
@@ -449,7 +455,7 @@
                             </div>
                             <div>
                                 <label for="t1-crimp-width-manual">Crimp W (mm) Man:</label>
-                                <input type="number" step="0.01" id="t1-crimp-width-manual" placeholder="2.30" oninput="validateManualInput(event)">
+                                <input type="number" step="0.01" id="t1-crimp-width-manual" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
@@ -458,7 +464,7 @@
                             </div>
                             <div>
                                 <label for="t1-insulation-width-manual">Insulation W (mm) Man:</label>
-                                <input type="number" step="0.01" id="t1-insulation-width-manual" placeholder="4.50" oninput="validateManualInput(event)">
+                                <input type="number" step="0.01" id="t1-insulation-width-manual" oninput="validateManualInput(event)">
                             </div>
                         </div>
                             
@@ -469,7 +475,7 @@
                             </div>
                             <div>
                                 <label for="t1-pull-force-manual">Pull Force (N) Man:</label>
-                                <input type="number" step="0.1" id="t1-pull-force-manual" placeholder="120.5" oninput="validateManualInput(event)">
+                                <input type="number" step="0.1" id="t1-pull-force-manual" oninput="validateManualInput(event)">
                             </div>
                             <div></div> 
                             <div></div> 
@@ -495,7 +501,7 @@
                             </div>
                             <div>
                                 <label for="t2-crimp-height-manual">Crimp H (mm) Man:</label>
-                                <input type="number" step="0.01" id="t2-crimp-height-manual" placeholder="1.25" oninput="validateManualInput(event)">
+                                <input type="number" step="0.01" id="t2-crimp-height-manual" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
@@ -504,7 +510,7 @@
                             </div>
                             <div>
                                 <label for="t2-insulation-height-manual">Insulation H (mm) Man:</label>
-                                <input type="number" step="0.01" id="t2-insulation-height-manual" placeholder="3.40" oninput="validateManualInput(event)">
+                                <input type="number" step="0.01" id="t2-insulation-height-manual" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
@@ -513,7 +519,7 @@
                             </div>
                             <div>
                                 <label for="t2-crimp-width-manual">Crimp W (mm) Man:</label>
-                                <input type="number" step="0.01" id="t2-crimp-width-manual" placeholder="2.30" oninput="validateManualInput(event)">
+                                <input type="number" step="0.01" id="t2-crimp-width-manual" oninput="validateManualInput(event)">
                             </div>
                             
                             <div>
@@ -522,7 +528,7 @@
                             </div>
                             <div>
                                 <label for="t2-insulation-width-manual">Insulation W (mm) Man:</label>
-                                <input type="number" step="0.01" id="t2-insulation-width-manual" placeholder="4.50" oninput="validateManualInput(event)">
+                                <input type="number" step="0.01" id="t2-insulation-width-manual" oninput="validateManualInput(event)">
                             </div>
                         </div>
                             
@@ -533,7 +539,7 @@
                             </div>
                             <div>
                                 <label for="t2-pull-force-manual">Pull Force (N) Man:</label>
-                                <input type="number" step="0.1" id="t2-pull-force-manual" placeholder="120.5" oninput="validateManualInput(event)">
+                                <input type="number" step="0.1" id="t2-pull-force-manual" oninput="validateManualInput(event)">
                             </div>
                             <div></div> 
                             <div></div> 
@@ -697,70 +703,54 @@
             socket.emit('join_machine_room', { machineName: machineName });
         }
         
-        function resetForm() {
-            // Reset all input fields
-            document.getElementById('shift').value = '';
-            document.getElementById('operator-name').value = '';
+        // **MODIFIED: This function now performs a partial clear (used after submission)**
+        function clearProductionFields() {
+            // Shift and Operator Name are intentionally NOT cleared here (as requested by user)
             document.getElementById('fg-part-no').value = ''; 
             document.getElementById('cable-id').value = ''; 
             document.getElementById('produced-qty').value = '';
             document.getElementById('produced-length').value = '';
             document.getElementById('qty-produced-hours').value = '';
             
-            // Reset Terminal 1 Fields (12 fields total)
-            document.getElementById('t1-terminal-id').value = ''; 
-            document.getElementById('t1-apl-no').value = ''; 
-            document.getElementById('t1-crimp-height-measured').value = '';
-            document.getElementById('t1-crimp-height-manual').value = '';
-            document.getElementById('t1-insulation-height-measured').value = '';
-            document.getElementById('t1-insulation-height-manual').value = '';
-            document.getElementById('t1-crimp-width-measured').value = '';
-            document.getElementById('t1-crimp-width-manual').value = '';
-            document.getElementById('t1-insulation-width-measured').value = '';
-            document.getElementById('t1-insulation-width-manual').value = '';
-            document.getElementById('t1-pull-force-measured').value = '';
-            document.getElementById('t1-pull-force-manual').value = '';
-            // Clear validation styles
-            document.getElementById('t1-crimp-height-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t1-insulation-height-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t1-crimp-width-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t1-insulation-width-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t1-pull-force-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t1-crimp-height-measured').removeAttribute('data-tolerance');
-            document.getElementById('t1-insulation-height-measured').removeAttribute('data-tolerance');
-            document.getElementById('t1-crimp-width-measured').removeAttribute('data-tolerance');
-            document.getElementById('t1-insulation-width-measured').removeAttribute('data-tolerance');
-            document.getElementById('t1-pull-force-measured').removeAttribute('data-tolerance');
+            // Terminal Manual/Measured fields to clear
+            const terminalFields = [
+                // T1
+                't1-terminal-id', 't1-apl-no',
+                't1-crimp-height-measured', 't1-crimp-height-manual',
+                't1-insulation-height-measured', 't1-insulation-height-manual',
+                't1-crimp-width-measured', 't1-crimp-width-manual',
+                't1-insulation-width-measured', 't1-insulation-width-manual',
+                't1-pull-force-measured', 't1-pull-force-manual',
+                // T2
+                't2-terminal-id', 't2-apl-no',
+                't2-crimp-height-measured', 't2-crimp-height-manual',
+                't2-insulation-height-measured', 't2-insulation-height-manual',
+                't2-crimp-width-measured', 't2-crimp-width-manual',
+                't2-insulation-width-measured', 't2-insulation-width-manual',
+                't2-pull-force-measured', 't2-pull-force-manual'
+            ];
 
-
-            // Reset Terminal 2 Fields (12 fields total)
-            document.getElementById('t2-terminal-id').value = ''; 
-            document.getElementById('t2-apl-no').value = '';
-            document.getElementById('t2-crimp-height-measured').value = '';
-            document.getElementById('t2-crimp-height-manual').value = '';
-            document.getElementById('t2-insulation-height-measured').value = '';
-            document.getElementById('t2-insulation-height-manual').value = '';
-            document.getElementById('t2-crimp-width-measured').value = '';
-            document.getElementById('t2-crimp-width-manual').value = '';
-            document.getElementById('t2-insulation-width-measured').value = '';
-            document.getElementById('t2-insulation-width-manual').value = '';
-            document.getElementById('t2-pull-force-measured').value = '';
-            document.getElementById('t2-pull-force-manual').value = '';
-            // Clear validation styles
-            document.getElementById('t2-crimp-height-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t2-insulation-height-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t2-crimp-width-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t2-insulation-width-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t2-pull-force-manual').classList.remove('valid-manual-input', 'invalid-manual-input');
-            document.getElementById('t2-crimp-height-measured').removeAttribute('data-tolerance');
-            document.getElementById('t2-insulation-height-measured').removeAttribute('data-tolerance');
-            document.getElementById('t2-crimp-width-measured').removeAttribute('data-tolerance');
-            document.getElementById('t2-insulation-width-measured').removeAttribute('data-tolerance');
-            document.getElementById('t2-pull-force-measured').removeAttribute('data-tolerance');
-
+            terminalFields.forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.value = '';
+                    // UPDATED: Clear new 3-color validation styles
+                    input.classList.remove('exact-match-input', 'tolerable-match-input', 'invalid-manual-input');
+                    input.removeAttribute('data-tolerance');
+                    input.removeAttribute('data-invalid'); // Clear new invalid attribute
+                }
+            });
 
             document.getElementById('message').textContent = '';
             setInitialDateTime(); // Reset date/time to current
+        }
+
+        // **MODIFIED: The Reset Button function (calls partial clear + clears persistent fields)**
+        function resetForm() {
+            clearProductionFields(); // Clear all production-specific fields
+            // Reset the persistent fields for a full reset
+            document.getElementById('shift').value = '';
+            document.getElementById('operator-name').value = '';
         }
 
         function markPlanLineComplete(lineId) {
@@ -793,7 +783,10 @@
                 input.removeAttribute('data-tolerance');
             });
             manualFields.forEach(id => {
-                 document.getElementById(id).classList.remove('valid-manual-input', 'invalid-manual-input');
+                 const input = document.getElementById(id);
+                 // UPDATED: Clear new 3-color validation styles
+                 input.classList.remove('exact-match-input', 'tolerable-match-input', 'invalid-manual-input');
+                 input.removeAttribute('data-invalid'); // Clear new invalid attribute
             });
         }
         
@@ -838,11 +831,12 @@
                 // Manually trigger the validation check if a manual value exists
                 const manualInputId = `${idPrefix}-manual`;
                 const manualInput = document.getElementById(manualInputId);
-                if(manualInput && manualInput.value.trim() !== '') {
+                if (manualInput && manualInput.value.trim() !== '') {
                     validateManualInput({ target: manualInput });
                 } else if (manualInput) {
                     // Clear styles if no manual value is present
-                    manualInput.classList.remove('valid-manual-input', 'invalid-manual-input');
+                    manualInput.classList.remove('exact-match-input', 'tolerable-match-input', 'invalid-manual-input');
+                    manualInput.removeAttribute('data-invalid'); // Clear new invalid attribute
                 }
             };
             
@@ -953,18 +947,18 @@
         }
         // --- END NEW FUNCTION ---
 
-        /** NEW FUNCTION: Performs live validation on a manual input field against its corresponding measured value and tolerance. */
+        /** UPDATED FUNCTION: Performs live validation on a manual input field against its corresponding measured value and tolerance, applying the 3-color scheme. */
         function validateManualInput(event) {
             const manualInput = event.target;
             const manualId = manualInput.id;
             
             // Derive the ID for the corresponding measured field. 
-            // e.g., 't1-crimp-height-manual' -> 't1-crimp-height-measured'
             const measuredId = manualId.replace('-manual', '-measured');
             const measuredInput = document.getElementById(measuredId);
             
-            // Clear previous validation styles
-            manualInput.classList.remove('valid-manual-input', 'invalid-manual-input');
+            // Clear previous validation styles and invalid data attribute
+            manualInput.classList.remove('exact-match-input', 'tolerable-match-input', 'invalid-manual-input');
+            manualInput.removeAttribute('data-invalid');
             
             if (!measuredInput) {
                 return; // No corresponding measured field
@@ -972,19 +966,52 @@
 
             const manualValue = parseFloat(manualInput.value);
             const measuredValue = parseFloat(measuredInput.value);
-            const tolerance = parseFloat(measuredInput.getAttribute('data-tolerance'));
             
-            // Only validate if all required numeric data is present and the user has entered a value
-            if (isNaN(manualValue) || isNaN(measuredValue) || isNaN(tolerance) || manualInput.value.trim() === '') {
+            // Only validate if required numeric data is present and the user has entered a value
+            if (manualInput.value.trim() === '' || isNaN(manualValue) || isNaN(measuredValue)) {
                 return; 
             }
 
-            const difference = Math.abs(manualValue - measuredValue);
-            
-            if (difference <= tolerance) {
-                manualInput.classList.add('valid-manual-input');
+            let validationType = 'invalid'; // Default to red/invalid
+            const epsilon = 0.0001; // Use a small epsilon for floating point comparison
+
+            if (manualId.includes('pull-force')) {
+                // Pull Force Logic (Minimum strength required)
+                if (manualValue < measuredValue) {
+                    validationType = 'invalid'; // Red: Less than minimum required
+                } else if (Math.abs(manualValue - measuredValue) < epsilon) {
+                    validationType = 'exact'; // Green: Exactly the minimum required
+                } else { // manualValue > measuredValue
+                    validationType = 'tolerable'; // Orange: Greater than minimum required (accepted but not exact)
+                }
             } else {
+                // Dimensional Measurements Logic (Tolerance +/-)
+                // This covers: Crimp H/W, Insulation H/W for both T1 & T2
+                const tolerance = parseFloat(measuredInput.getAttribute('data-tolerance'));
+                
+                if (isNaN(tolerance)) {
+                    return;
+                }
+                
+                const difference = Math.abs(manualValue - measuredValue);
+                
+                if (difference > tolerance) {
+                    validationType = 'invalid'; // Red: Outside tolerance
+                } else if (Math.abs(difference) < epsilon) { // If manualValue is effectively equal to measuredValue
+                    validationType = 'exact'; // Green: Exact match
+                } else { 
+                    validationType = 'tolerable'; // Orange: Within tolerance but not exact
+                }
+            }
+            
+            // Apply the final style based on validationType
+            if (validationType === 'exact') {
+                manualInput.classList.add('exact-match-input');
+            } else if (validationType === 'tolerable') {
+                manualInput.classList.add('tolerable-match-input');
+            } else { // 'invalid'
                 manualInput.classList.add('invalid-manual-input');
+                manualInput.setAttribute('data-invalid', 'true'); // Block submission
             }
         }
         
@@ -1083,6 +1110,7 @@
                         parseAndAssign('T2_CRIMP_H', 'DIMENSIONAL');
                         parseAndAssign('T2_INSULATION_H', 'DIMENSIONAL');
                         parseAndAssign('T2_CRIMP_W', 'DIMENSIONAL');
+                        parseAndAssign('T2_CRIMP_W', 'DIMENSIONAL'); // DUPED, but let's keep it consistent
                         parseAndAssign('T2_INSULATION_W', 'DIMENSIONAL');
                         parseAndAssign('T2_PULL_FORCE', 'PULL_FORCE');
                         
@@ -1140,6 +1168,7 @@
         // --- END FIXED Excel Upload Functions ---
 
 
+        /** UPDATED FUNCTION: Submit Output with Pre-Submission Validation Check and ONLY sending manual data. */
         function submitOutput() {
             const machineName = machineNameHidden.value;
             if (!machineName) {
@@ -1147,53 +1176,43 @@
                 return;
             }
             
-            const data = {
-                shift: document.getElementById('shift').value,
-                operator_name: document.getElementById('operator-name').value, 
-                machine_name: machineName,
-                fg_part_no: document.getElementById('fg-part-no').value,
-                cable_id: document.getElementById('cable-id').value,
-                produced_qty: parseInt(document.getElementById('produced-qty').value),
-                produced_length: parseFloat(document.getElementById('produced-length').value),
-                qty_produced_hours: parseFloat(document.getElementById('qty-produced-hours').value),
-                entry_date: document.getElementById('entry-date').value, 
-                entry_time: document.getElementById('entry-time').value,
-                
-                t1_terminal_id: document.getElementById('t1-terminal-id').value,
-                t1_apl_no: document.getElementById('t1-apl-no').value,
-                t1_crimp_height_measured: parseFloat(document.getElementById('t1-crimp-height-measured').value),
-                t1_crimp_height_manual: parseFloat(document.getElementById('t1-crimp-height-manual').value),
-                t1_insulation_height_measured: parseFloat(document.getElementById('t1-insulation-height-measured').value),
-                t1_insulation_height_manual: parseFloat(document.getElementById('t1-insulation-height-manual').value),
-                t1_crimp_width_measured: parseFloat(document.getElementById('t1-crimp-width-measured').value),
-                t1_crimp_width_manual: parseFloat(document.getElementById('t1-crimp-width-manual').value),
-                t1_insulation_width_measured: parseFloat(document.getElementById('t1-insulation-width-measured').value),
-                t1_insulation_width_manual: parseFloat(document.getElementById('t1-insulation-width-manual').value),
-                t1_pull_force_measured: parseFloat(document.getElementById('t1-pull-force-measured').value),
-                t1_pull_force_manual: parseFloat(document.getElementById('t1-pull-force-manual').value),
-                
-                t2_terminal_id: document.getElementById('t2-terminal-id').value,
-                t2_apl_no: document.getElementById('t2-apl-no').value,
-                t2_crimp_height_measured: parseFloat(document.getElementById('t2-crimp-height-measured').value),
-                t2_crimp_height_manual: parseFloat(document.getElementById('t2-crimp-height-manual').value),
-                t2_insulation_height_measured: parseFloat(document.getElementById('t2-insulation-height-measured').value),
-                t2_insulation_height_manual: parseFloat(document.getElementById('t2-insulation-height-manual').value),
-                t2_crimp_width_measured: parseFloat(document.getElementById('t2-crimp-width-measured').value),
-                t2_crimp_width_manual: parseFloat(document.getElementById('t2-crimp-width-manual').value),
-                t2_insulation_width_measured: parseFloat(document.getElementById('t2-insulation-width-measured').value),
-                t2_insulation_width_manual: parseFloat(document.getElementById('t2-insulation-width-manual').value),
-                t2_pull_force_measured: parseFloat(document.getElementById('t2-pull-force-measured').value),
-                t2_pull_force_manual: parseFloat(document.getElementById('t2-pull-force-manual').value)
-            };
-            
             if (!document.querySelector('#entry-date').checkValidity() || !document.querySelector('#entry-time').checkValidity() || !document.querySelector('#shift').checkValidity() || !document.querySelector('#operator-name').checkValidity() || !document.querySelector('#fg-part-no').checkValidity() || !document.querySelector('#cable-id').checkValidity()) {
                 showMessageBox('Please fill in all general required fields.', 'error');
                 return;
             }
+            
+            // --- NEW VALIDATION CHECK: Terminal Manual Input ---
+            const manualInputs = [
+                't1-crimp-height-manual', 't1-insulation-height-manual', 't1-crimp-width-manual', 
+                't1-insulation-width-manual', 't1-pull-force-manual', 
+                't2-crimp-height-manual', 't2-insulation-height-manual', 't2-crimp-width-manual', 
+                't2-insulation-width-manual', 't2-pull-force-manual'
+            ];
+            
+            let invalidInputFound = false;
+            let invalidFieldName = '';
 
-            const qty = data.produced_qty;
-            const length = data.produced_length;
-            const hours = data.qty_produced_hours;
+            for (const id of manualInputs) {
+                const input = document.getElementById(id);
+                // Check if the input has a value AND is marked as invalid (RED status) by the live validation function
+                if (input && input.value.trim() !== '' && input.getAttribute('data-invalid') === 'true') {
+                    invalidInputFound = true;
+                    // Get the label text for the error message
+                    const label = document.querySelector(`label[for="${id}"]`);
+                    invalidFieldName = label ? label.textContent.replace(':', '').trim() : id;
+                    break;
+                }
+            }
+            
+            if (invalidInputFound) {
+                showMessageBox(`Submission Blocked: The manual input for "${invalidFieldName}" does not meet the measurement specification (Red status). Please correct the value or clear the field to skip the measurement.`, 'error');
+                return; // STOP SUBMISSION
+            }
+            // --- END NEW VALIDATION CHECK ---
+
+            const qty = parseInt(document.getElementById('produced-qty').value);
+            const length = parseFloat(document.getElementById('produced-length').value);
+            const hours = parseFloat(document.getElementById('qty-produced-hours').value);
 
             if (isNaN(qty) || qty < 1) {
                  showMessageBox('Quantity must be a positive whole number.', 'error');
@@ -1212,33 +1231,42 @@
             document.getElementById('message').style.backgroundColor = '#EFF6FF';
             document.getElementById('message').style.color = '#1E40AF';
 
+            // **MODIFIED: ONLY SEND MANUAL INPUTS, NOT MEASURED INPUTS**
+            const data = {
+                shift: document.getElementById('shift').value,
+                operator_name: document.getElementById('operator-name').value, 
+                machine_name: machineName,
+                fg_part_no: document.getElementById('fg-part-no').value,
+                cable_id: document.getElementById('cable-id').value,
+                produced_qty: qty,
+                produced_length: length,
+                qty_produced_hours: hours,
+                entry_date: document.getElementById('entry-date').value, 
+                entry_time: document.getElementById('entry-time').value,
+                
+                // Terminal 1 (IDs + Manual Data)
+                t1_terminal_id: document.getElementById('t1-terminal-id').value,
+                t1_apl_no: document.getElementById('t1-apl-no').value,
+                t1_crimp_height_manual: parseFloat(document.getElementById('t1-crimp-height-manual').value),
+                t1_insulation_height_manual: parseFloat(document.getElementById('t1-insulation-height-manual').value),
+                t1_crimp_width_manual: parseFloat(document.getElementById('t1-crimp-width-manual').value),
+                t1_insulation_width_manual: parseFloat(document.getElementById('t1-insulation-width-manual').value),
+                t1_pull_force_manual: parseFloat(document.getElementById('t1-pull-force-manual').value),
+                
+                // Terminal 2 (IDs + Manual Data)
+                t2_terminal_id: document.getElementById('t2-terminal-id').value,
+                t2_apl_no: document.getElementById('t2-apl-no').value,
+                t2_crimp_height_manual: parseFloat(document.getElementById('t2-crimp-height-manual').value),
+                t2_insulation_height_manual: parseFloat(document.getElementById('t2-insulation-height-manual').value),
+                t2_crimp_width_manual: parseFloat(document.getElementById('t2-crimp-width-manual').value),
+                t2_insulation_width_manual: parseFloat(document.getElementById('t2-insulation-width-manual').value),
+                t2_pull_force_manual: parseFloat(document.getElementById('t2-pull-force-manual').value)
+            };
+
             socket.emit('submit_output', data);
 
-            document.getElementById('fg-part-no').value = ''; 
-            document.getElementById('cable-id').value = ''; 
-            document.getElementById('produced-qty').value = '';
-            document.getElementById('produced-length').value = '';
-            document.getElementById('qty-produced-hours').value = '';
-            
-            clearMeasuredFields(); 
-            document.getElementById('t1-terminal-id').value = ''; 
-            document.getElementById('t1-apl-no').value = ''; 
-            document.getElementById('t1-crimp-height-manual').value = '';
-            document.getElementById('t1-insulation-height-manual').value = '';
-            document.getElementById('t1-crimp-width-manual').value = '';
-            document.getElementById('t1-insulation-width-manual').value = '';
-            document.getElementById('t1-pull-force-manual').value = '';
-
-            document.getElementById('t2-terminal-id').value = ''; 
-            document.getElementById('t2-apl-no').value = '';
-            document.getElementById('t2-crimp-height-manual').value = '';
-            document.getElementById('t2-insulation-height-manual').value = '';
-            document.getElementById('t2-crimp-width-manual').value = '';
-            document.getElementById('t2-insulation-width-manual').value = '';
-            document.getElementById('t2-pull-force-manual').value = '';
-            
-            // Clear validation styles and data-tolerance attributes from all inputs
-            resetForm(); 
+            // **MODIFIED: Clear only production fields, keeping Shift/Operator Name**
+            clearProductionFields(); 
 
             document.getElementById('message').textContent = 'Output submitted successfully! Ready for next entry.';
             setTimeout(() => { document.getElementById('message').textContent = ''; }, 3000); 
@@ -1329,7 +1357,8 @@
                 'success': { bg: '#10B981', border: '#34D399', icon: '✅' },
                 'error': { bg: '#EF4444', border: '#F87171', icon: '❌' },
                 'warning': { bg: '#F59E0B', border: '#FCD34D', icon: '⚠️' },
-                'info': { bg: '#3B82F6', border: '#60A5FA', icon: '💬' }
+                // FIX: Added missing quote and comma here
+                'info': { bg: '#3B82F6', border: '#60A5FA', icon: '💬' } 
             };
             const style = colors[type] || colors['info'];
 

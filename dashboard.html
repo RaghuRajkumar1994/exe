@@ -31,6 +31,10 @@
         #totals-table th { background-color: #3B82F6; }
         #log-table tr:hover { background-color: #f0fdf4; }
         
+        /* Styles for Inventory Table */
+        #inventory-card th { background-color: #3B82F6; color: white; }
+        #inventory-card tr:hover { background-color: #eff6ff; }
+        
         .upload-form-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -43,12 +47,12 @@
             }
         }
         
-        /* === NEW MESSAGE MODAL STYLES === */
+        /* === MESSAGE MODAL STYLES === */
         #message-trigger {
             position: fixed;
             bottom: 30px;
             right: 30px;
-            z-index: 1010; /* Higher than modal */
+            z-index: 1010; 
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -59,7 +63,7 @@
 
         #message-modal {
             position: fixed;
-            bottom: 100px; /* Position above the trigger button */
+            bottom: 100px; 
             right: 30px;
             z-index: 1000;
             background-color: white;
@@ -67,7 +71,7 @@
             border-radius: 10px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             width: 300px;
-            display: none; /* Controlled by JS */
+            display: none; 
             flex-direction: column;
             gap: 10px;
             transform-origin: bottom right;
@@ -97,8 +101,6 @@
         }
         /* ================================ */
         
-        /* The CSS dots are only included for completeness, as we use emojis 
-           in the select options for cross-browser compatibility. */
         .status-dot {
             height: 8px;
             width: 8px;
@@ -107,10 +109,20 @@
             margin-right: 6px;
         }
         .dot-online {
-            background-color: #10B981; /* Green-500 from Tailwind */
+            background-color: #10B981; 
         }
         .dot-offline {
-            background-color: #EF4444; /* Red-500 from Tailwind */
+            background-color: #EF4444; 
+        }
+        
+        /* Custom style for the dropdown buttons */
+        #data-update-modal button {
+            transition: background-color 0.1s;
+        }
+
+        /* Custom style for the inline table header search */
+        #inventory-card th {
+            position: relative; /* Crucial for positioning the absolute input */
         }
     </style>
 </head>
@@ -179,18 +191,84 @@
             </form>
             <p id="upload-status" class="mt-4 text-sm font-medium text-center"></p>
         </div>
-
+        
         <div class="controls flex flex-wrap justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-md">
             <div class="flex items-center space-x-4">
                 <label for="date-filter" class="font-medium text-gray-700">Filter Date:</label>
                 <input type="date" id="date-filter" class="p-2 border border-gray-300 rounded-lg text-base">
             </div>
             <div id="total-submissions" class="text-lg font-bold text-gray-800">Total Entries Displayed: 0</div>
-            <button id="export-button" onclick="exportData()" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-150 shadow-md">
-                Export All Data (CSV)
-            </button>
+            
+            <div class="flex space-x-3 relative"> 
+                 
+                <input type="file" id="stock-sheet" name="stock_sheet" accept=".xlsx,.xls" required style="display: none;">
+                <input type="file" id="consume-sheet" name="consume_sheet" accept=".xlsx,.xls" required style="display: none;">
+                
+                <button type="button" id="trigger-data-update" onclick="toggleDataUpdateModal(true)"
+                        class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition duration-150 shadow-md flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6"/><path d="M21.5 2v6h-6"/><path d="M2.5 22v-6h6"/><path d="M2.5 22v-6h6"/><path d="M20 11.5A8.5 8.5 0 0 0 11.5 3H10"/><path d="M4 12.5A8.5 8.5 0 0 0 12.5 21H14"/></svg>
+                    Data Update
+                </button>
+                
+                <div id="data-update-modal" 
+                     class="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-xl z-50 p-2 hidden">
+                    <button onclick="handleDataUpdateOption('stock')" 
+                            class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md flex items-center gap-2">
+                        <span class="status-dot dot-online" style="background-color: #9333ea;"></span> Update Stock
+                    </button>
+                    <button onclick="handleDataUpdateOption('consume')" 
+                            class="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md flex items-center gap-2 mt-1">
+                        <span class="status-dot" style="background-color: #EC4899;"></span> Update Consume
+                    </button>
+                </div>
+                 
+                 <button id="inventory-button" onclick="showInventoryDetails()" 
+                        class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-150 shadow-md">
+                    View Stock Inventory
+                </button>
+                <button id="export-button" onclick="exportData()" class="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition duration-150 shadow-md">
+                    Export All Data (CSV)
+                </button>
+            </div>
         </div>
         
+        <p id="consume-upload-status" class="mb-4 text-sm font-medium text-center"></p>
+        <p id="stock-upload-status" class="mb-4 text-sm font-medium text-center"></p>
+
+        <div id="inventory-card" class="card mt-6 mb-6 hidden">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 pb-2 border-b flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 text-blue-500"><path d="M21 8H3l2 12h14l2-12z"/><path d="M12 21v-8"/><path d="M7 16V8a5 5 0 0 1 10 0v8"/></svg>
+                Cable Stock Inventory
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead>
+                        <tr>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white bg-blue-500 rounded-tl-lg relative">
+                                <div id="cable-id-th-content" class="flex items-center justify-between">
+                                    <span class="mr-2">Cable ID</span>
+                                    <svg id="cable-id-search-icon" class="w-4 h-4 cursor-pointer hover:text-gray-200 transition" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" onclick="showCableIdSearch()">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </div>
+                                <input type="text" id="inventory-search" placeholder="Filter Cable ID..." 
+                                       class="absolute left-0 right-0 top-0 bottom-0 w-full p-1 pl-2 text-xs text-gray-800 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 opacity-0 transition-opacity duration-150 pointer-events-none"
+                                       onblur="hideCableIdSearch()"
+                                       onkeyup="calculateAndDisplayInventory()"
+                                       >
+                            </th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white bg-blue-500">Initial Stock (M)</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white bg-blue-500">Consumed (M)</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white bg-blue-500 rounded-tr-lg">Remaining (M)</th>
+                            <th class="py-3 px-4 text-left text-xs font-medium uppercase tracking-wider text-white bg-blue-500 rounded-tr-lg">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-table-body" class="bg-white divide-y divide-gray-200">
+                        <tr><td colspan="5" class="px-4 py-4 text-sm text-gray-500 text-center">No Stock data available.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
         <div class="dashboard-grid analytics-section">
             <div class="card chart-card">
                 <h2 class="text-xl font-semibold text-gray-700 mb-4">Quantity by Machine</h2>
@@ -268,54 +346,101 @@
         const modalMessageTextarea = document.getElementById('modal-message-text');
         const messageStatusElement = document.getElementById('message-status');
         const targetMachineSelect = document.getElementById('target-machine');
+        
+        // --- STOCK/INVENTORY CONSTANTS ---
+        const inventoryCard = document.getElementById('inventory-card'); 
+        const inventoryTableBody = document.getElementById('inventory-table-body');
+        const stockUploadStatusElement = document.getElementById('stock-upload-status'); 
+        const stockSheetInput = document.getElementById('stock-sheet'); 
+        // Renamed/Repurposed: The search input is now inline on the table header
+        const inventorySearchInput = document.getElementById('inventory-search');
+        
+        // --- CONSUMPTION CONSTANTS ---
+        const consumeSheetInput = document.getElementById('consume-sheet');
+        const consumeUploadStatusElement = document.getElementById('consume-upload-status'); 
+        
+        // --- DATA UPDATE MODAL CONSTANTS ---
+        const dataUpdateModal = document.getElementById('data-update-modal'); 
+        
         let machineQtyChart = null;
 
+        // --- CABLE INVENTORY DATA (DYNAMIC/PERSISTENT) ---
+        let initialCableStock = {}; 
+        let latestLogData = []; 
 
         // --- Machine List ---
         const machineList = [ 
             "AUM-002", "AUM-003", "AUM-009", "AUM-001", 
             "AUM-010", "AUM-005", "AUM-011", "AUM-012" 
         ];
+        
+        // --- NEW: Inline Cable ID Search Handlers ---
+        
+        function showCableIdSearch() {
+            const content = document.getElementById('cable-id-th-content');
+            const input = document.getElementById('inventory-search');
+            
+            // Hide text/icon
+            content.classList.add('hidden');
+            
+            // Show and enable input
+            input.classList.remove('opacity-0', 'pointer-events-none');
+            
+            // Wait for next frame before focusing to ensure it's visible
+            setTimeout(() => {
+                input.focus();
+            }, 10); 
+        }
 
-        // --- Function to populate the select dropdowns with machine list and REAL status ---
+        function hideCableIdSearch() {
+            const content = document.getElementById('cable-id-th-content');
+            const input = document.getElementById('inventory-search');
+            
+            // Hide only if the input is empty
+            if (input.value.trim() === '') {
+                // Show text/icon
+                content.classList.remove('hidden');
+                
+                // Hide and disable input
+                input.classList.add('opacity-0', 'pointer-events-none');
+            }
+            // If not empty, it remains visible as an active filter
+        }
+        
+        // --- Function to populate the select dropdowns (UNCHANGED) ---
         function populateMachineSelects(onlineMachines = []) {
             const selectElements = [targetMachineSelect, modalMachineSelect];
             
             selectElements.forEach(select => {
                 let selectedValue = select.value;
 
-                // Clear existing options, but keep the first one (the placeholder)
                 while (select.options.length > 1) {
                     select.remove(1);
                 }
 
                 machineList.forEach((machine) => {
-                    // CRITICAL FIX LOGIC: Status is determined by inclusion in the onlineMachines array
                     const isOnline = onlineMachines.includes(machine);
                     const statusText = isOnline ? 'ONLINE' : 'OFFLINE';
                     const statusEmoji = isOnline ? '🟢' : '🔴';
                     
                     const option = document.createElement('option');
                     option.value = machine;
-                    // Use emoji for visual status since native <option> does not support complex HTML/CSS dots
                     option.textContent = `${statusEmoji} ${machine} (${statusText})`;
                     
-                    // Highlight online machines in the selection
                     if (isOnline) {
-                         option.style.backgroundColor = '#ecfdf5'; // Green-50
+                         option.style.backgroundColor = '#ecfdf5'; 
                     }
                     
                     select.appendChild(option);
                 });
                 
-                // Restore selection after update
                 if (selectedValue) {
                     select.value = selectedValue;
                 }
             });
         }
 
-        // --- Plan Upload Form Submission ---
+        // --- Plan Upload Form Submission (UNCHANGED) ---
         planUploadForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -332,9 +457,8 @@
                 const resultText = await response.text();
 
                 if (response.ok) {
-                    uploadStatusElement.textContent = resultText; // Success message from server
+                    uploadStatusElement.textContent = resultText;
                     uploadStatusElement.className = 'mt-4 text-sm font-bold text-center text-green-600';
-                    // Optional: Clear file input and reset select after success
                     document.getElementById('plan-sheet').value = ''; 
                     targetMachineSelect.value = '';
                 } else {
@@ -348,10 +472,120 @@
             }
         });
 
-        // --- Date Filter Logic ---
+        // --- Stock Upload Logic (UNCHANGED, but triggered differently) ---
+        if (stockSheetInput) {
+            stockSheetInput.addEventListener('change', async function(e) {
+                if (!this.files.length) {
+                     stockUploadStatusElement.textContent = '';
+                     return;
+                }
+                
+                const formData = new FormData();
+                formData.append('stock_sheet', this.files[0]);
+                
+                stockUploadStatusElement.textContent = 'Uploading and processing stock file...';
+                stockUploadStatusElement.className = 'mb-4 text-sm font-medium text-center text-purple-600';
+                consumeUploadStatusElement.textContent = ''; 
+
+                try {
+                    const response = await fetch('/upload_stock', { 
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json(); 
+
+                    if (response.ok && result.success) {
+                        stockUploadStatusElement.textContent = `✅ ${result.message}`;
+                        stockUploadStatusElement.className = 'mb-4 text-sm font-bold text-center text-green-600';
+                        this.value = ''; 
+                    } else {
+                        const errorMessage = result.error || 'Unknown error during file processing. Check server logs.';
+                        stockUploadStatusElement.textContent = `❌ Stock Upload Failed: ${errorMessage}`;
+                        stockUploadStatusElement.className = 'mb-4 text-sm font-bold text-center text-red-600';
+                    }
+                } catch (error) {
+                    console.error('Stock Upload Network Error:', error);
+                    stockUploadStatusElement.textContent = 'A network error occurred or server did not respond. Check your backend endpoint `/upload_stock`.';
+                    stockUploadStatusElement.className = 'mb-4 text-sm font-bold text-center text-red-600';
+                }
+            });
+        }
+        
+        // --- Consume Data Upload Logic (UNCHANGED, but triggered differently) ---
+        if (consumeSheetInput) {
+            consumeSheetInput.addEventListener('change', async function(e) {
+                if (!this.files.length) {
+                     consumeUploadStatusElement.textContent = '';
+                     return;
+                }
+                
+                const formData = new FormData();
+                formData.append('consume_sheet', this.files[0]);
+                
+                consumeUploadStatusElement.textContent = 'Uploading and processing consumption file...';
+                consumeUploadStatusElement.className = 'mb-4 text-sm font-medium text-center text-pink-600';
+                stockUploadStatusElement.textContent = ''; 
+
+
+                try {
+                    const response = await fetch('/upload_consumption', { 
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const result = await response.json(); 
+
+                    if (response.ok && result.success) {
+                        consumeUploadStatusElement.textContent = `✅ ${result.message}`;
+                        consumeUploadStatusElement.className = 'mb-4 text-sm font-bold text-center text-green-600';
+                        this.value = ''; 
+                    } else {
+                        const errorMessage = result.error || 'Unknown error during file processing. Check server logs.';
+                        consumeUploadStatusElement.textContent = `❌ Consumption Upload Failed: ${errorMessage}`;
+                        consumeUploadStatusElement.className = 'mb-4 text-sm font-bold text-center text-red-600';
+                    }
+                } catch (error) {
+                    console.error('Consumption Upload Network Error:', error);
+                    consumeUploadStatusElement.textContent = 'A network error occurred. Check your backend endpoint `/upload_consumption`.';
+                    consumeUploadStatusElement.className = 'mb-4 text-sm font-bold text-center text-red-600';
+                }
+            });
+        }
+        
+        // --- Data Update Modal Handlers (UNCHANGED) ---
+        
+        function toggleDataUpdateModal(show) {
+            if (show) {
+                dataUpdateModal.classList.remove('hidden');
+                document.addEventListener('click', closeDataUpdateModalOutside, true);
+            } else {
+                dataUpdateModal.classList.add('hidden');
+                document.removeEventListener('click', closeDataUpdateModalOutside, true);
+            }
+        }
+        
+        function closeDataUpdateModalOutside(event) {
+            const button = document.getElementById('trigger-data-update');
+            if (dataUpdateModal.style.display !== 'none' && !button.contains(event.target) && !dataUpdateModal.contains(event.target)) {
+                toggleDataUpdateModal(false);
+            }
+        }
+        
+        function handleDataUpdateOption(type) {
+            toggleDataUpdateModal(false); 
+            
+            if (type === 'stock') {
+                stockSheetInput.click(); 
+            } else if (type === 'consume') {
+                consumeSheetInput.click(); 
+            }
+        }
+
+
+        // --- Date Filter Logic (UNCHANGED) ---
         function requestDataForDate() {
             const selectedDate = dateFilter.value;
-            // Send request to server to filter data
             socket.emit('request_dashboard_data', { date: selectedDate });
         }
 
@@ -363,10 +597,11 @@
             dateFilter.value = today;
         });
 
-        // --- Data Update Handler ---
+        // --- Data Update Handler (UNCHANGED) ---
         function updateDisplay(data) {
-            // Update Log Table
-            // NOTE: The colspan must be 23 to cover all columns including the two APL NO columns
+            latestLogData = data.log; 
+            initialCableStock = data.initial_stock || {}; 
+            
             let logHTML = data.log.length > 0 ? '' : '<tr><td colspan="23" class="px-4 py-4 text-sm text-gray-500 text-center">No production data found for this date.</td></tr>'; 
             
             let totalQty = 0;
@@ -405,7 +640,7 @@
                     </tr>
                 `;
                 totalQty += parseInt(entry.produced_qty) || 0;
-                totalLength += parseFloat(entry.produced_length) || 0;
+                totalLength += parseFloat(entry.produced_length) || 0; 
                 totalHours += parseFloat(entry.qty_produced_hours) || 0;
             });
 
@@ -415,17 +650,131 @@
             // Update Totals Table
             let totalsHTML = `
                 <tr><td class="px-4 py-2 text-sm font-medium text-gray-700">Total Produced QTY</td><td class="px-4 py-2 text-sm font-bold text-green-600">${totalQty.toLocaleString()}</td></tr>
-                <tr><td class="px-4 py-2 text-sm font-medium text-gray-700">Total Length (M/F)</td><td class="px-4 py-2 text-sm font-bold text-blue-600">${totalLength.toFixed(1)}</td></tr>
+                <tr><td class="px-4 py-2 text-sm font-medium text-gray-700">Total Length (M)</td><td class="px-4 py-2 text-sm font-bold text-blue-600">N/A*</td></tr>
                 <tr><td class="px-4 py-2 text-sm font-medium text-gray-700">Total Production Hours</td><td class="px-4 py-2 text-sm font-bold text-red-600">${totalHours.toFixed(1)}</td></tr>
+                <tr><td colspan="2" class="px-4 py-2 text-xs text-gray-500">* Total Length in log is per-piece length. See Inventory for consumed cable total.</td></tr>
             `;
             totalsTableBody.innerHTML = totalsHTML;
 
-            // Update Chart
             updateChart(data.chart_data);
             
-            // Note: Machine selects are updated via 'update_machine_status' event
+            // Recalculate and update inventory display whenever dashboard data changes
+            calculateAndDisplayInventory(); 
+        }
+        
+        // --- Inventory Calculation and Display (UNCHANGED) ---
+        function calculateAndDisplayInventory() {
+            // Get search term from the inline input
+            const searchTerm = inventorySearchInput ? inventorySearchInput.value : '';
+
+            const consumedByCable = latestLogData.reduce((acc, entry) => {
+                const cableId = entry.cable_id;
+                
+                let workerInputLength = parseFloat(entry.produced_length) || 0; 
+                const totalQuantity = parseInt(entry.produced_qty) || 0;
+                
+                const singlePieceLengthInMeters = workerInputLength / 1000;
+                const totalConsumedLength = singlePieceLengthInMeters * totalQuantity; 
+                
+                if (cableId) {
+                    acc[cableId] = (acc[cableId] || 0) + totalConsumedLength;
+                }
+                return acc;
+            }, {});
+
+            let inventoryHTML = '';
+            let lowStockNotification = '';
+            const allCableIds = new Set([
+                ...Object.keys(initialCableStock), 
+                ...Object.keys(consumedByCable)
+            ]);
+            
+            const filteredCableIds = Array.from(allCableIds).filter(cableId => {
+                // Filter logic using the new inline input's value
+                return cableId.toLowerCase().includes(searchTerm.toLowerCase());
+            }).sort(); 
+            
+            if (filteredCableIds.length === 0) {
+                 const message = allCableIds.size === 0 
+                     ? 'No cable stock or production data found. Upload stock using the "Data Update" button.'
+                     : 'No cable ID matches your search criteria.';
+                 inventoryHTML = `<tr><td colspan="5" class="px-4 py-4 text-sm text-gray-500 text-center">${message}</td></tr>`;
+            } else {
+                 filteredCableIds.forEach(cableId => {
+                    const initialStock = initialCableStock[cableId] || 0;
+                    const consumed = consumedByCable[cableId] || 0; 
+                    const remaining = Math.max(0, initialStock - consumed); 
+                    
+                    let statusText = '';
+                    let statusColor = '';
+                    
+                    const remainingPercentage = (initialStock > 0) ? (remaining / initialStock) * 100 : 0;
+
+
+                    if (initialStock === 0) {
+                        statusText = 'No Stock Data';
+                        statusColor = 'text-gray-500';
+                    } else if (remaining <= 0.01) { 
+                        statusText = 'OUT OF STOCK';
+                        statusColor = 'text-red-600 font-bold';
+                    } else if (remainingPercentage >= 95) { 
+                        statusText = 'FULL STOCK AVAILABLE';
+                        statusColor = 'text-green-600 font-medium'; 
+                    } else if (remainingPercentage < 20) { 
+                        statusText = 'LOW STOCK ⚠️';
+                        statusColor = 'text-yellow-600 font-bold';
+                        lowStockNotification += `${cableId} is low (${remaining.toFixed(1)}M). `; 
+                    } else { 
+                        statusText = 'AVERAGE STOCK';
+                        statusColor = 'text-orange-600 font-medium';
+                    }
+                    
+                    inventoryHTML += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-2 text-sm font-medium text-gray-700">${cableId}</td>
+                            <td class="px-4 py-2 text-sm text-gray-800">${initialStock.toLocaleString()}</td>
+                            <td class="px-4 py-2 text-sm text-red-600">${consumed.toFixed(1)}</td>
+                            <td class="px-4 py-2 text-sm text-blue-600 font-bold">${remaining.toFixed(1)}</td>
+                            <td class="px-4 py-2 text-sm ${statusColor}">${statusText}</td>
+                        </tr>
+                    `;
+                 });
+            }
+
+            inventoryTableBody.innerHTML = inventoryHTML;
+
+            const existingNotif = document.getElementById('low-stock-alert');
+            if (lowStockNotification) {
+                 if (existingNotif) existingNotif.remove();
+
+                 const alertDiv = document.createElement('div');
+                 alertDiv.id = 'low-stock-alert';
+                 alertDiv.className = 'fixed top-0 left-0 right-0 bg-yellow-400 text-gray-800 p-3 text-center font-bold z-50 shadow-lg cursor-pointer';
+                 alertDiv.textContent = `🚨 LOW STOCK ALERT (Based on today's consumption): ${lowStockNotification.trim()}`;
+                 alertDiv.onclick = () => alertDiv.remove(); 
+                 document.body.prepend(alertDiv);
+            } else if (existingNotif) {
+                 existingNotif.remove();
+            }
+        }
+        
+        // --- Inventory Search Event Listener (REMOVED: Now onkeyup is used inline in HTML) ---
+
+        // --- Toggle Inventory Card Visibility (UNCHANGED) ---
+        function showInventoryDetails() {
+            const button = document.getElementById('inventory-button');
+            const isHidden = inventoryCard.classList.contains('hidden');
+            if (isHidden) {
+                calculateAndDisplayInventory(); 
+                inventoryCard.classList.remove('hidden');
+                button.textContent = 'Hide Stock Inventory';
+            } else {
+                inventoryCard.classList.add('hidden');
+                button.textContent = 'View Stock Inventory';
+            }
         }
 
+        // --- Chart/Export/Message Functions (UNCHANGED) ---
         function updateChart(chartData) {
             const ctx = document.getElementById('machine-qty-chart').getContext('2d');
             
@@ -475,20 +824,16 @@
             }
         }
         
-        // --- Export Function ---
         function exportData() {
             window.location.href = '/export';
         }
         
-        // --- Message Modal Functions ---
         function toggleMessageModal(show) {
             if (show) {
                  messageModal.style.display = 'flex';
-                 // Ensure machine list is up-to-date before opening
-                 // The machine list is constantly updated by socket.on('update_machine_status')
             } else {
                  messageModal.style.display = 'none';
-                 showMessageStatus(''); // Clear status when closing
+                 showMessageStatus('');
             }
         }
         
@@ -517,26 +862,19 @@
                 messageText: messageText
             });
             
-            // Clear message text area after sending attempt
             modalMessageTextarea.value = '';
         }
         
-        // --- Socket.IO Connection and Events ---
+        // --- Socket.IO Connection and Events (UNCHANGED) ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize machine selects (initially with no machines online)
-            // It will be immediately updated by broadcast_online_status() on connect
             populateMachineSelects(); 
-            
-            // Request initial data when the dashboard loads
             requestDataForDate();
         });
 
-        // --- Socket.IO Event Listener for Dashboard Data ---
         socket.on('update_dashboard', (data) => {
             updateDisplay(data);
         });
 
-        // --- Socket.IO Listener for Message Confirmation ---
         socket.on('message_sent_confirm', (data) => {
              if (data.success) {
                  showMessageStatus(`Message sent to ${data.machineName}.`, 'text-green-600');
@@ -545,14 +883,11 @@
              }
         });
         
-        // --- Socket.IO Listener for Machine Status Update ---
         socket.on('update_machine_status', (data) => {
-             // This event is now emitted by server.py whenever a machine connects/disconnects.
              if (data && Array.isArray(data.onlineMachines)) {
                 populateMachineSelects(data.onlineMachines);
              } else {
                 console.error("Received invalid machine status data:", data);
-                // Fallback to update with an empty array (all offline)
                 populateMachineSelects([]);
              }
         });
